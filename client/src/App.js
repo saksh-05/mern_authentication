@@ -1,10 +1,12 @@
+import React from 'react'
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      authentication app
+    <div>
+      Authentication App
+      
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
