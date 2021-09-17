@@ -16,9 +16,9 @@ mongoose.connect(uri, {
 });
 
 app.get("/", (req, res) => {
-    res.send("Image Page");
-  });
+  res.send("Image Page");
+});
 
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
-  });
+  console.log(`Example app listening at http://localhost:${port}`);
+});
