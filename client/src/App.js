@@ -5,9 +5,10 @@ import Box from "@mui/material/Box";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
-import Signup from "./components/signup";
-import Login from "./components/login";
+import Signup from "./components/Signup";
+import Login from "./components/Login";
 import { Button, Typography } from "@mui/material";
+import UserInfo from "./components/UserInfo";
 
 const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
 
@@ -78,6 +79,7 @@ const App = () => {
             {/* {" "}
             <Breed data={val} /> */}
           </Route>
+          <Route path='/userInfo' component={UserInfo} />
           <Route path="/" component={Signup}>
             {/* {" "} */}
             {/* <Homepage data={val} /> */}
