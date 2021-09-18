@@ -4,7 +4,6 @@ import {
   Box,
   CardContent,
   Button,
-  TextField,
   Typography,
   FormControl,
   InputAdornment,
@@ -23,8 +22,11 @@ import Google from '../resources/Google.svg';
 import Facebook from '../resources/Facebook.svg';
 import Twitter from '../resources/Twitter.svg';
 import Github from '../resources/Github.svg';
+import { useTheme } from "@emotion/react";
+import dlogo from '../resources/devchallenges-light.svg';
 
 const Signup = () => {
+  const theme= useTheme();
   const [values, setValues] = useState({
     password: "",
     showpassword: false,
@@ -46,10 +48,11 @@ const Signup = () => {
   };
 
   return (
-    <div>
-      <Card sx={{ mx: "auto", width: "40%", p: 4 }}>
+    <>
+      <Card sx={{ mx: "auto", width: "40%", p: 4, textAlign:'left' }}>
         <CardContent>
-          <img src={logo} alt="logo" />
+          {console.log(theme.palette.mode)}
+          {theme.palette.mode==='light'?<img src={logo} alt="logo" />:<img src={dlogo} alt='dark logo' />}
           <Box component="form">
             <Typography
               variant="h5"
@@ -111,6 +114,8 @@ const Signup = () => {
                 fontFamily: "Noto Sans",
                 textTransform: "none",
                 fontSize: "1rem",
+                background:'#2F80ED',
+                color:'white'
               }}
               variant="contained"
             >
@@ -147,12 +152,12 @@ const Signup = () => {
                 mt: 5,
               }}
             >
-              Already a member?<a href='#'>Login</a>
+              Already a member?<a href='login'>Login</a>
             </Typography>
           </Box>
         </CardContent>
       </Card>
-    </div>
+    </>
   );
 };
 
