@@ -25,10 +25,14 @@
   },
   "homepage": "https://github.com/saurabhtopthon01/MERN_Authentication#readme",
   "dependencies": {
+    "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "joi": "^17.4.2",
     "mongodb": "^4.1.2",
     "mongoose": "^6.0.6",
-    "nodemon": "^2.0.12"
+    "nodemon": "^2.0.12",
+    "uuid": "^8.3.2"
   }
 }
