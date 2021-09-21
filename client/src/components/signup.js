@@ -84,13 +84,13 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await axios
-      .post(`${base_url}loginsignup`, {
+      .post(`${base_url}loginsignup/signup`, {
         email: values.email,
         password: values.password,
       })
       .then((res) => {
-        console.log(res.status);
-        res.status===200 ? (
+        console.log(res);
+        res.data.status === true ? (
           <Redirect to="/userInfo" />
         ) : (
           console.log(res.data.message)
@@ -144,6 +144,7 @@ const Signup = () => {
             </FormControl>
             <FormControl sx={{ mb: 3, width: "100%" }} variant="outlined">
               <TextField
+                autocomplete
                 required
                 id="outlined-password"
                 type={values.showPassword ? "text" : "password"}

@@ -79,7 +79,7 @@ const App = () => {
             {/* {" "}
             <Breed data={val} /> */}
           </Route>
-          <Route path='/userInfo' component={UserInfo} />
+          <Route path='/userinfo' component={UserInfo} ></Route>
           <Route path="/" component={Signup}>
             {/* {" "} */}
             {/* <Homepage data={val} /> */}
