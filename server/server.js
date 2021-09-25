@@ -15,9 +15,11 @@ mongoose.connect(uri, {
   useUnifiedTopology: true,
 });
 
-const userRouter = require("./routes/userRecord");
-app.use("/loginsignup", userRouter);
+const authRouter = require("./routes/auth.route");
+app.use("/user", authRouter);
 
+const userRouter = require("./routes/user.route");
+app.use("/update", userRouter);
 
 const userInfo = require("./userModels/user.modal");
 app.get("/", async (req, res) => {
