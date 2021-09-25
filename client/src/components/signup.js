@@ -13,31 +13,40 @@ import {
   Stack,
   Avatar,
   TextField,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import logo from "../resources/devchallenges.svg";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
-import Google from "../resources/Google.svg";
-import Facebook from "../resources/Facebook.svg";
-import Twitter from "../resources/Twitter.svg";
-import Github from "../resources/Github.svg";
 import { useTheme } from "@emotion/react";
 import dlogo from "../resources/devchallenges-light.svg";
 import axios from "axios";
 import base_url from "../devpro/baseurl";
 import { userEmailSchema, userPasswordSchema } from "./UserValidation";
-import { Redirect } from "react-router";
+import { useHistory } from "react-router-dom";
+import FacebookSignup from "./FacebookSignup";
+import Twitter from "./Twitter";
+import GitHub from "./GitHub";
+import Google from "../resources/Google.svg";
+import ReactGoogleLogin from "react-google-login";
 
 const Signup = () => {
   const theme = useTheme();
+  const history = useHistory();
   const [values, setValues] = useState({
     email: "",
     password: "",
     showpassword: false,
     emailHelperShow: false,
     passwordHelperShow: false,
+  });
+  const [snack, setSnack] = useState({
+    fault: false,
+    message: "",
+    severity: "",
   });
 
   const handleChange = (prop) => async (event) => {
@@ -66,7 +75,7 @@ const Signup = () => {
       console.log("emailValid", emailValid);
       emailValid
         ? setValues({ ...values, emailHelperShow: false })
-        : console.log("error gone?");
+        : console.log("nothing");
     }
 
     if (e.target.id === "outlined-password") {
@@ -80,24 +89,92 @@ const Signup = () => {
         : console.log("error gone?");
     }
   };
+  const handleClose = () => {
+    setSnack({ ...snack, fault: false });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const emailValid = await userEmailSchema.isValid(values);
+    const passwordValid = await userPasswordSchema.isValid(values);
+    if (emailValid && passwordValid) {
+      await axios
+        .post(`${base_url}user/signup`, {
+          email: values.email,
+          password: values.password,
+        })
+        .then((res) => {
+          console.log(res);
+          if (res.data.message === "user exist") {
+            history.push({
+              pathname: "/login",
+              params: {
+                fault: true,
+                message: "User exist please login",
+              },
+            });
+          }
+          // if (res.data.status === true) {
+          //   if (res.data.message === "user added") {
+          //     console.log(res.data.message);
+          //     setSnack({
+          //       ...snack,
+          //       fault: true,
+          //       message: res.data.message,
+          //       severity: "success",
+          //     });
+          //     // <Alert severity="success">You are loggedin</Alert>;
+          //     history.push("/userInfo");
+          //   } else {
+          //     console.log(res.data.message);
+          //     history.push({
+          //       pathname: "/login",
+          //       message: res.data.message,
+          //     });
+          //   }
+          // } else {
+          //   setSnack({ ...snack, fault: true, message: res.data.message });
+          //   // <Alert severity="error">Incorrect password</Alert>;
+          //   console.log(res.data.message);
+          // }
+        })
+        .catch((err) => {
+          console.log("error" + err);
+        });
+    } else {
+      setSnack({
+        ...snack,
+        fault: true,
+        message: "Enter correct detail",
+        severity: "error",
+      });
+    }
+    console.log("submitting");
+  };
+
+  const onGoogleResponse = async (resp) => {
+    console.log(resp);
     await axios
-      .post(`${base_url}loginsignup/signup`, {
-        email: values.email,
-        password: values.password,
+      .post(`${base_url}user/googleregister`, {
+        idToken: resp.tokenId,
       })
       .then((res) => {
         console.log(res);
-        res.data.status === true ? (
-          <Redirect to="/userInfo" />
-        ) : (
-          console.log(res.data.message)
-        );
+        if (res.data.message === "google added") {
+          history.push({
+            pathname: "/userInfo",
+            params: {
+              fault: true,
+              message: "User signup success",
+            },
+          });
+        }else{
+          setSnack({...snack,fault:true,message:"User already exist", severity:'error'})
+        }
       })
-      .catch((err) => console.log(err));
-    console.log("submitting");
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
@@ -215,10 +292,22 @@ const Signup = () => {
               alignItems="center"
               justifyContent="center"
             >
-              <Avatar src={Google} alt="google" />
-              <Avatar src={Facebook} alt="facebook" />
-              <Avatar src={Twitter} alt="twitter" />
-              <Avatar src={Github} alt="github" />
+              <ReactGoogleLogin
+                clientId="147318885374-hslkg3ffdun8877mvo2u5p1dg8jgr418.apps.googleusercontent.com"
+                render={(renderProps) => (
+                  <Avatar
+                    onClick={renderProps.onClick}
+                    src={Google}
+                    alt="google"
+                  />
+                )}
+                buttonText=""
+                onSuccess={onGoogleResponse}
+                onFailure={onGoogleResponse}
+              />
+              <FacebookSignup />
+              <Twitter />
+              <GitHub />
             </Stack>
             <Typography
               variant="caption"
@@ -236,6 +325,16 @@ const Signup = () => {
           </Box>
         </CardContent>
       </Card>
+      <Snackbar
+        open={snack.fault}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert severity={snack.severity} onClose={handleClose}>
+          {snack.severity}:{snack.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

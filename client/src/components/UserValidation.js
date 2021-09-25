@@ -7,3 +7,7 @@ export const userEmailSchema = yup.object().shape({
 export const userPasswordSchema = yup.object().shape({
   password: yup.string().required("required"),
 })
+
+export const userPhoneSchema = yup.object().shape({
+  password: yup.number().positive().min(10).max(10),
+})
