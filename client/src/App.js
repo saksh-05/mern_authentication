@@ -7,7 +7,7 @@ import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
-import Edituser from "./components/Edituser";
+import EditUser from "./components/Edituser";
 import {
   AppBar,
   Button,
@@ -48,7 +48,7 @@ const App = () => {
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
-        <AppBar position="static" sx={{ padding: "1rem" }}>
+        <AppBar position="static" sx={{ px: "1rem" ,}}>
           <Toolbar>
             {theme.palette.mode === "light" ? (
               <img src={logo} alt="logo" width="192px" />
@@ -103,12 +103,12 @@ const App = () => {
               {/* {" "}
             <Breed data={val} /> */}
             </Route>
-            <Route path="/userInfo" component={UserInfo}></Route>
+            <Route path="/userInfo/:id" component={UserInfo}></Route>
             <Route
               path="/activate/:token"
               render={(props) => <Activate {...props} />}
             />
-            <Route path="/editUser" component={Edituser} />
+            <Route path="/editUser/:id" component={EditUser} />
             <Route path="/" component={Signup}>
               {/* {" "} */}
               {/* <Homepage data={val} /> */}

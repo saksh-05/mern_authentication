@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import axios from "axios";
 import {
   Card,
@@ -14,61 +14,95 @@ import {
   MenuItem,
   Alert,
   Snackbar,
+  FormControl,
 } from "@mui/material";
 import logo from "../resources/devchallenges.svg";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import GroupIcon from "@mui/icons-material/Group";
-import { userEmailSchema, userPhoneSchema } from "./UserValidation";
+import { userUpdateEmailSchema, userPhoneSchema } from "./UserValidation";
+import base_url from "../devpro/baseurl";
+import { signout } from "../auth/auth";
 
-const Edituser = () => {
+const Edituser = (params) => {
+  console.log(params);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const history = useHistory();
   const [userValues, setUserValue] = useState({
-    src: "",
+    src: null,
     name: "",
     bio: "",
-    phone: 0,
+    phone: "",
     email: "",
     password: "",
+    img: "",
   });
 
   const [snack, setSnack] = useState({
     fault: false,
     message: "",
-    severity: "",
+    severity: "success",
   });
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleCloseMenu = () => {
-    setAnchorEl(null);
-  };
-
   const handleValues = (prop) => async (event) => {
-    console.log(prop);
-    if (prop === "src") {
+    if (prop === "img") {
+      console.log(event.target.files[0]);
       setUserValue({
         ...userValues,
         [prop]: URL.createObjectURL(event.target.files[0]),
+        src: event.target.files[0],
       });
     } else {
       setUserValue({ ...userValues, [prop]: event.target.value });
     }
-    console.log(userValues[prop]);
   };
 
-  const handleSubmit = async () => {
-    const emailValid = await userEmailSchema.isValid(userValues);
+  useEffect(() => {
+    axios
+      .get(`${base_url}userinfo`, {
+        id: `${params.match.params.id}`,
+      })
+      .then((res) => {
+        setUserValue({
+          src: `${base_url}` + res.data.user.src,
+          name: res.data.user.name,
+          email: res.data.user.email,
+          password: res.data.user.password,
+          bio: res.data.user.bio,
+          phone: res.data.user.phone,
+        });
+        console.log(userValues);
+        console.log(res);
+      })
+      .catch((err) => console.log(err));
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const emailValid = await userUpdateEmailSchema.isValid(userValues);
     const phoneValid = await userPhoneSchema.isValid(userValues);
+
+    let formData = new FormData();
+    formData.append("src", userValues.src);
+    formData.append("email", userValues.email);
+    formData.append("password", userValues.password);
+    formData.append("name", userValues.name);
+    formData.append("bio", userValues.bio);
+    formData.append("phone", userValues.phone);
+
+    console.log(userValues.src);
+    console.log(formData.get("src"));
+
     if (emailValid && phoneValid) {
       await axios
-        .post("/upload", {
-          userValues,
-        })
+        .put(`${base_url}userinfo`, formData)
         .then((res) => {
+          history.push(`/userInfo/${params.match.params.id}`);
           console.log(res);
         })
         .catch((err) => console.log(err));
@@ -85,14 +119,14 @@ const Edituser = () => {
           ...snack,
           fault: true,
           severity: "error",
-          message: "Incorrect Email",
+          message: "Incorrect Phone",
         });
       else
         setSnack({
           ...snack,
           fault: true,
           severity: "error",
-          message: "Incorrect Phone",
+          message: "Incorrect Email",
         });
     }
   };
@@ -120,7 +154,7 @@ const Edituser = () => {
           aria-haspopup="true"
           onClick={handleMenu}
         >
-          <Avatar alt="avatar" />
+          <Avatar alt="avatar" src={userValues.src} />
         </IconButton>
         <Menu
           id="menu-appbar"
@@ -135,19 +169,37 @@ const Edituser = () => {
             horizontal: "right",
           }}
           open={Boolean(anchorEl)}
-          onClose={handleCloseMenu}
+          onClose={() => {
+            setAnchorEl(null);
+          }}
           sx={{ top: "4rem", left: "-8px", width: "13rem" }}
         >
-          <MenuItem onClick={handleCloseMenu}>
+          <MenuItem
+            onClick={() => {
+              setAnchorEl(null);
+              history.push(`/userInfo/${params.match.params.id}`);
+            }}
+          >
             <AccountCircle sx={{ marginRight: "1rem" }} />
             Profile
           </MenuItem>
-          <MenuItem onClick={handleCloseMenu}>
+          <MenuItem
+            onClick={() => {
+              setAnchorEl(null);
+            }}
+          >
             <GroupIcon sx={{ marginRight: "1rem" }} />
             Group chat
           </MenuItem>
           <Divider />
-          <MenuItem onClick={handleCloseMenu}>
+          <MenuItem
+            onClick={() => {
+              setAnchorEl(null);
+              signout(() => {
+                history.push("/");
+              });
+            }}
+          >
             <LogoutIcon sx={{ marginRight: "1rem" }} />
             logout
           </MenuItem>
@@ -155,6 +207,7 @@ const Edituser = () => {
       </div>
       <Box
         component="form"
+        // encType="multipart/form-data"
         onSubmit={handleSubmit}
         sx={{ width: "60%", margin: "auto" }}
       >
@@ -179,152 +232,164 @@ const Edituser = () => {
             </Typography>
           </div>
         </Card>
+        <FormControl sx={{ width: "100%" }}>
+          <Card
+            sx={{
+              width: "100%",
+              display: "inline-flex",
+              paddingLeft: "3rem",
+              height: "8rem",
+              alignItems: "center",
+            }}
+          >
+            <Card sx={{ width: "6rem", height: "6rem" }}>
+              <img
+                src={userValues.img}
+                alt={userValues.img}
+                width="100%"
+                height="100%"
+              />
+              <CameraAltIcon
+                sx={{ position: "relative", top: "-4rem", color: "white" }}
+              />
+            </Card>
+            <Box textAlign="left" sx={{ width: "18rem", ml: 4 }}>
+              <input
+                accept="image/*"
+                style={{ display: "none" }}
+                id="file-input"
+                multiple
+                type="file"
+                onChange={handleValues("img")}
+              />
+              <label htmlFor="file-input">
+                <Button component="span">Choose Image</Button>
+              </label>
+            </Box>
+          </Card>
+        </FormControl>
 
-        <Card
-          sx={{
-            width: "100%",
-            display: "inline-flex",
-            paddingLeft: "3rem",
-            height: "8rem",
-            alignItems: "center",
-          }}
-        >
-          <Card sx={{ width: "6rem", height: "6rem" }}>
-            <img
-              src={userValues.src}
-              alt="profile"
-              width="100%"
-              height="100%"
-            />
-            <CameraAltIcon
-              sx={{ position: "relative", top: "-4rem", color: "white" }}
+        <FormControl sx={{ width: "100%" }}>
+          <Card
+            sx={{
+              width: "100%",
+              paddingLeft: "3rem",
+              height: "8rem",
+              display: "inline-grid",
+              textAlign: "center",
+              pt: "1rem",
+            }}
+          >
+            <Box textAlign="left" sx={{ width: "18rem" }}>
+              <Typography fontFamily="Noto Sans">Name</Typography>
+            </Box>
+            <TextField
+              id="outlined-basic"
+              placeholder="Enter your name..."
+              variant="outlined"
+              onChange={handleValues("name")}
+              sx={{ width: "25rem", mt: "-1.5rem" }}
             />
           </Card>
-          <Box textAlign="left" sx={{ width: "18rem", ml: 4 }}>
-            <input
-              accept="image/*"
-              style={{ display: "none" }}
-              id="raised-button-file"
-              multiple
-              type="file"
-              onChange={handleValues("src")}
+        </FormControl>
+
+        <FormControl sx={{ width: "100%" }}>
+          <Card
+            sx={{
+              width: "100%",
+              paddingLeft: "3rem",
+              height: "15rem",
+              display: "inline-grid",
+              textAlign: "center",
+              pt: "1rem",
+            }}
+          >
+            <Box textAlign="left" sx={{ width: "18rem" }}>
+              <Typography fontFamily="Noto Sans">Bio</Typography>
+            </Box>
+            <TextField
+              id="outlined-textarea"
+              placeholder="Enter your bio..."
+              onChange={handleValues("bio")}
+              multiline
+              rows={6}
+              sx={{ width: "25rem", mt: "-1.5rem" }}
             />
-            <label htmlFor="raised-button-file">
-              <Button component="span">Choose Image</Button>
-            </label>
-          </Box>
-        </Card>
+          </Card>
+        </FormControl>
 
-        <Card
-          sx={{
-            width: "100%",
-            paddingLeft: "3rem",
-            height: "8rem",
-            display: "inline-grid",
-            textAlign: "center",
-            pt: "1rem",
-          }}
-        >
-          <Box textAlign="left" sx={{ width: "18rem" }}>
-            <Typography fontFamily="Noto Sans">Name</Typography>
-          </Box>
-          <TextField
-            id="outlined-basic"
-            placeholder="Enter your name..."
-            variant="outlined"
-            onChange={handleValues("name")}
-            sx={{ width: "25rem", mt: "-1.5rem" }}
-          />
-        </Card>
+        <FormControl sx={{ width: "100%" }}>
+          <Card
+            sx={{
+              width: "100%",
+              paddingLeft: "3rem",
+              height: "8rem",
+              display: "inline-grid",
+              textAlign: "center",
+              pt: "1rem",
+            }}
+          >
+            <Box textAlign="left" sx={{ width: "18rem" }}>
+              <Typography fontFamily="Noto Sans">Phone</Typography>
+            </Box>
+            <TextField
+              id="outlined-basic"
+              placeholder="Enter your phone..."
+              variant="outlined"
+              onChange={handleValues("phone")}
+              sx={{ width: "25rem", mt: "-1.5rem" }}
+            />
+          </Card>
+        </FormControl>
 
-        <Card
-          sx={{
-            width: "100%",
-            paddingLeft: "3rem",
-            height: "15rem",
-            display: "inline-grid",
-            textAlign: "center",
-            pt: "1rem",
-          }}
-        >
-          <Box textAlign="left" sx={{ width: "18rem" }}>
-            <Typography fontFamily="Noto Sans">Bio</Typography>
-          </Box>
-          <TextField
-            id="outlined-textarea"
-            placeholder="Enter your bio..."
-            onChange={handleValues("bio")}
-            multiline
-            rows={6}
-            sx={{ width: "25rem", mt: "-1.5rem" }}
-          />
-        </Card>
+        <FormControl sx={{ width: "100%" }}>
+          <Card
+            sx={{
+              width: "100%",
+              paddingLeft: "3rem",
+              height: "8rem",
+              display: "inline-grid",
+              textAlign: "center",
+              pt: "1rem",
+            }}
+          >
+            <Box textAlign="left" sx={{ width: "18rem" }}>
+              <Typography fontFamily="Noto Sans">Email</Typography>
+            </Box>
+            <TextField
+              id="outlined-basic"
+              placeholder="Enter your email"
+              variant="outlined"
+              onChange={handleValues("email")}
+              sx={{ width: "25rem", mt: "-1.5rem" }}
+            />
+          </Card>
+        </FormControl>
 
-        <Card
-          sx={{
-            width: "100%",
-            paddingLeft: "3rem",
-            height: "8rem",
-            display: "inline-grid",
-            textAlign: "center",
-            pt: "1rem",
-          }}
-        >
-          <Box textAlign="left" sx={{ width: "18rem" }}>
-            <Typography fontFamily="Noto Sans">Phone</Typography>
-          </Box>
-          <TextField
-            id="outlined-basic"
-            placeholder="Enter your phone..."
-            variant="outlined"
-            onChange={handleValues("phone")}
-            sx={{ width: "25rem", mt: "-1.5rem" }}
-          />
-        </Card>
+        <FormControl sx={{ width: "100%" }}>
+          <Card
+            sx={{
+              width: "100%",
+              paddingLeft: "3rem",
+              height: "8rem",
+              display: "inline-grid",
+              textAlign: "center",
+              pt: "1rem",
+            }}
+          >
+            <Box textAlign="left" sx={{ width: "18rem" }}>
+              <Typography fontFamily="Noto Sans">Password</Typography>
+            </Box>
+            <TextField
+              id="outlined-basic"
+              placeholder="Enter your new password"
+              variant="outlined"
+              onChange={handleValues("password")}
+              sx={{ width: "25rem", mt: "-1.5rem" }}
+            />
+          </Card>
+        </FormControl>
 
-        <Card
-          sx={{
-            width: "100%",
-            paddingLeft: "3rem",
-            height: "8rem",
-            display: "inline-grid",
-            textAlign: "center",
-            pt: "1rem",
-          }}
-        >
-          <Box textAlign="left" sx={{ width: "18rem" }}>
-            <Typography fontFamily="Noto Sans">Email</Typography>
-          </Box>
-          <TextField
-            id="outlined-basic"
-            placeholder="Enter your email"
-            variant="outlined"
-            onChange={handleValues("email")}
-            sx={{ width: "25rem", mt: "-1.5rem" }}
-          />
-        </Card>
-
-        <Card
-          sx={{
-            width: "100%",
-            paddingLeft: "3rem",
-            height: "8rem",
-            display: "inline-grid",
-            textAlign: "center",
-            pt: "1rem",
-          }}
-        >
-          <Box textAlign="left" sx={{ width: "18rem" }}>
-            <Typography fontFamily="Noto Sans">Password</Typography>
-          </Box>
-          <TextField
-            id="outlined-basic"
-            placeholder="Enter your new password"
-            variant="outlined"
-            onChange={handleValues("password")}
-            sx={{ width: "25rem", mt: "-1.5rem" }}
-          />
-        </Card>
         <Card
           sx={{
             width: "100%",
@@ -333,20 +398,16 @@ const Edituser = () => {
             display: "inline-grid",
             textAlign: "center",
             pt: "1rem",
+            boxShadow: "none",
           }}
         >
-          <Link
-            to="/userInfo"
-            style={{ textDecoration: "none", textAlign: "left" }}
+          <Button
+            variant="contained"
+            type="submit"
+            sx={{ width: "20%", height: "2.5rem" }}
           >
-            <Button
-              variant="contained"
-              type="submit"
-              sx={{ width: "20%", height: "2.5rem" }}
-            >
-              Save
-            </Button>
-          </Link>
+            Save
+          </Button>
         </Card>
       </Box>
       <Snackbar

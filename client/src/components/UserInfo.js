@@ -12,16 +12,27 @@ import {
 } from "@mui/material";
 import { Box, useTheme } from "@mui/system";
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import GroupIcon from "@mui/icons-material/Group";
 import logo from "../resources/devchallenges.svg";
 import { useHistory } from "react-router";
+import base_url from "../devpro/baseurl";
 
 const UserInfo = (params) => {
   console.log(params);
   const theme = useTheme();
   const history = useHistory();
+
+  const [userValues, setUserValue] = useState({
+    src: "",
+    name: "",
+    bio: "",
+    phone: "",
+    email: "",
+    password: "",
+  });
 
   const [snack, setSnack] = useState({
     fault: false,
@@ -30,6 +41,24 @@ const UserInfo = (params) => {
   });
 
   useEffect(() => {
+    axios
+      .get(`${base_url}userinfo`, {
+        id: `${params.match.params.id}`,
+      })
+      .then((res) => {
+        setUserValue({
+          src: `${base_url}` + res.data.user.src,
+          name: res.data.user.name,
+          email: res.data.user.email,
+          password: res.data.user.password,
+          bio: res.data.user.bio,
+          phone: res.data.user.phone,
+        });
+        console.log(userValues);
+        console.log(res);
+      })
+      .catch((err) => console.log(err));
+
     if (params.location.params !== undefined) {
       setSnack({
         ...snack,
@@ -65,7 +94,7 @@ const UserInfo = (params) => {
           color: "white",
           position: "relative",
           top: "-6rem",
-          width: "10%",
+          width: "12%",
           marginLeft: "auto",
           right: "9rem",
         }}
@@ -78,7 +107,7 @@ const UserInfo = (params) => {
           onClick={handleMenu}
           color="inherit"
         >
-          <Avatar alt="avatar" src={<AccountCircle />} />
+          <Avatar alt="avatar" src={userValues.src} />
         </IconButton>
         <Menu
           id="menu-appbar"
@@ -94,7 +123,7 @@ const UserInfo = (params) => {
           }}
           open={Boolean(anchorEl)}
           onClose={handleCloseMenu}
-          sx={{ top: "4rem", left: "-8px", width: "11rem" }}
+          sx={{ top: "4rem", left: "-8px", width: "13rem" }}
         >
           <MenuItem onClick={handleCloseMenu}>
             <AccountCircle sx={{ marginRight: "1rem" }} />
@@ -164,7 +193,7 @@ const UserInfo = (params) => {
                 border: "1px solid #828282",
               }}
               onClick={() => {
-                history.push("/editUser");
+                history.push(`/editUser/${params.match.params.id}`);
               }}
             >
               Edit
@@ -190,7 +219,7 @@ const UserInfo = (params) => {
             </Typography>
           </Box>
           <Card sx={{ width: "6rem", height: "6rem" }}>
-            <img src={logo} alt="profile" />
+            <img src={userValues.src} alt="profile" width="80px" />
           </Card>
         </Card>
         <Divider />
@@ -212,7 +241,7 @@ const UserInfo = (params) => {
             </Typography>
           </Box>
           <Typography variant="h5" fontFamily="Noto Sans">
-            Name
+            {userValues.name}
           </Typography>
         </Card>
         <Divider />
@@ -234,7 +263,7 @@ const UserInfo = (params) => {
             </Typography>
           </Box>
           <Typography variant="h5" fontFamily="Noto Sans">
-            Bio
+            {userValues.bio}
           </Typography>
         </Card>
         <Divider />
@@ -256,7 +285,7 @@ const UserInfo = (params) => {
             </Typography>
           </Box>
           <Typography variant="h5" fontFamily="Noto Sans">
-            Phone
+            {userValues.phone}
           </Typography>
         </Card>
         <Divider />
@@ -278,7 +307,7 @@ const UserInfo = (params) => {
             </Typography>
           </Box>
           <Typography variant="h5" fontFamily="Noto Sans">
-            Email
+            {userValues.email}
           </Typography>
         </Card>
         <Divider />

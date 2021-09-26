@@ -27,9 +27,9 @@ import axios from "axios";
 import base_url from "../devpro/baseurl";
 import { userEmailSchema, userPasswordSchema } from "./UserValidation";
 import { useHistory } from "react-router-dom";
-import FacebookSignup from "./FacebookSignup";
-import Twitter from "./Twitter";
-import GitHub from "./GitHub";
+import Facebook from '../resources/Facebook.svg';
+import Twitter from '../resources/Twitter.svg';
+import Github from '../resources/Github.svg';
 import Google from "../resources/Google.svg";
 import ReactGoogleLogin from "react-google-login";
 
@@ -168,8 +168,13 @@ const Signup = () => {
               message: "User signup success",
             },
           });
-        }else{
-          setSnack({...snack,fault:true,message:"User already exist", severity:'error'})
+        } else {
+          setSnack({
+            ...snack,
+            fault: true,
+            message: "User already exist",
+            severity: "error",
+          });
         }
       })
       .catch((err) => {
@@ -305,9 +310,7 @@ const Signup = () => {
                 onSuccess={onGoogleResponse}
                 onFailure={onGoogleResponse}
               />
-              <FacebookSignup />
-              <Twitter />
-              <GitHub />
+              
             </Stack>
             <Typography
               variant="caption"
@@ -320,7 +323,19 @@ const Signup = () => {
                 mt: 5,
               }}
             >
-              Already a member?<a href="login">Login</a>
+              Already a member?
+              <span
+                onClick={() => {
+                  history.push("/login");
+                }}
+                style={{
+                  color: "#3f50b5",
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                }}
+              >
+                Login
+              </span>
             </Typography>
           </Box>
         </CardContent>

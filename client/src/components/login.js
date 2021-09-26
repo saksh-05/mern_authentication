@@ -107,6 +107,7 @@ const Login = (params) => {
           // console.log(res);
 
           if (res.data.message === "success") {
+            console.log(res.data);
             authenticate(res, () => {
               setValues({
                 ...values,
@@ -115,7 +116,7 @@ const Login = (params) => {
               });
               isAuth()
                 ? history.push({
-                    pathname: "/userInfo",
+                    pathname: `/userInfo/${res.data.user._id}`,
                     params: {
                       fault: true,
                     },
@@ -333,7 +334,19 @@ const Login = (params) => {
                 mt: 5,
               }}
             >
-              Already a member?<a href="/">Register</a>
+              Already a member?
+              <span
+                onClick={() => {
+                  history.push("/signup");
+                }}
+                style={{
+                  color: "#3f50b5",
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                }}
+              >
+                Register
+              </span>
             </Typography>
           </Box>
         </CardContent>
