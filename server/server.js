@@ -1,4 +1,5 @@
 const express = require("express");
+const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
@@ -8,6 +9,8 @@ require("dotenv").config();
 const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const uri = process.env.ATLAS_URI;
 mongoose.connect(uri, {
@@ -19,7 +22,7 @@ const authRouter = require("./routes/auth.route");
 app.use("/user", authRouter);
 
 const userRouter = require("./routes/user.route");
-app.use("/update", userRouter);
+app.use("/userinfo", userRouter);
 
 const userInfo = require("./userModels/user.modal");
 app.get("/", async (req, res) => {
@@ -30,6 +33,12 @@ app.get("/", async (req, res) => {
     console.log(error);
   }
 });
+
+app.use(express.static("resources"));
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("../client/build"));
+}
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
