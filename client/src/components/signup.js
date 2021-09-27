@@ -248,11 +248,17 @@ const Signup = () => {
     if (code) {
       await axios
         .post(
-          `https://github.com/login/oauth/access_token?code=${code}&client_id=${process.env.REACT_APP_GITHUB_CLIENT}&client_secret=${process.env.REACT_APP_GITHUB_SECRET}`,
+          "https://github.com/login/oauth/access_token/",
           {},
           {
+            params: {
+              code: code,
+              client_id: "09a20728be4cbb8db076",
+              client_secret: "475435e0b3bb53775e957c62e2dfacdd84df2c7b",
+            },
             headers: {
               "Access-Control-Allow-Origin": "*",
+              "Content-Type": "application/json",
             },
           }
         )
