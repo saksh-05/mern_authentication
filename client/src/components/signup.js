@@ -27,11 +27,14 @@ import axios from "axios";
 import base_url from "../devpro/baseurl";
 import { userEmailSchema, userPasswordSchema } from "./UserValidation";
 import { useHistory } from "react-router-dom";
-import Facebook from '../resources/Facebook.svg';
-import Twitter from '../resources/Twitter.svg';
-import Github from '../resources/Github.svg';
+import Facebook from "../resources/Facebook.svg";
+import Twitter from "../resources/Twitter.svg";
+import Github from "../resources/Github.svg";
 import Google from "../resources/Google.svg";
 import ReactGoogleLogin from "react-google-login";
+import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
+import TwitterLogin from "react-twitter-login";
+import GitHubLogin from "react-github-login";
 
 const Signup = () => {
   const theme = useTheme();
@@ -161,14 +164,16 @@ const Signup = () => {
       .then((res) => {
         console.log(res);
         if (res.data.message === "google added") {
-          history.push({
-            pathname: "/userInfo",
-            params: {
-              fault: true,
-              message: "User signup success",
-            },
-          });
+          // history.push({
+          //   pathname: "/userInfo",
+          //   params: {
+          //     fault: true,
+          //     message: "User signup success",
+          //   },
+          // });
+          // ${res.data.user._id}
         } else {
+          history.push("/login");
           setSnack({
             ...snack,
             fault: true,
@@ -181,6 +186,30 @@ const Signup = () => {
         console.log(err);
       });
   };
+
+  const onFacebookResponse = (response) => {
+    console.log(response);
+    const { userID, accessToken } = response;
+    axios
+      .post(`${base_url}user/facebookregister`, {
+        userID,
+        accessToken,
+      })
+      .then((res) => {
+        console.log(res.data);
+        // informParent(res);
+      })
+      .catch((error) => {
+        console.log("FACEBOOK SIGNIN ERROR", error.response);
+      });
+  };
+
+  const authHandler = (err, data) => {
+    console.log(err, data);
+  };
+
+  const onGithubResponse = (response) => console.log(response);
+  const onFailure = (response) => console.error(response);
 
   return (
     <>
@@ -310,7 +339,43 @@ const Signup = () => {
                 onSuccess={onGoogleResponse}
                 onFailure={onGoogleResponse}
               />
-              
+              <FacebookLogin
+                appId="1034702324052153"
+                autoLoad={false}
+                fields="name,email,picture"
+                callback={onFacebookResponse}
+                render={(renderProps) => (
+                  <Avatar
+                    onClick={renderProps.onClick}
+                    src={Facebook}
+                    alt="facebook"
+                  />
+                )}
+              />
+              <TwitterLogin
+                authCallback={authHandler}
+                consumerKey="xLYSfRJ9H8zcDcmduN6Kn11QP"
+                consumerSecret="343Ocn2uhwgGYUoXKJlCzrjEHi35rlajlmJwNExMtBywJ7IXy3"
+                render={(renderProps) => (
+                  <Avatar
+                    onClick={renderProps.onClick}
+                    src={Twitter}
+                    alt="twitter"
+                  />
+                )}
+              />
+              <GitHubLogin
+                clientId="09a20728be4cbb8db076"
+                onSuccess={onGithubResponse}
+                onFailure={onFailure}
+                render={(renderProps) => (
+                  <Avatar
+                    onClick={renderProps.onClick}
+                    src={Github}
+                    alt="github"
+                  />
+                )}
+              />
             </Stack>
             <Typography
               variant="caption"
