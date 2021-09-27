@@ -236,7 +236,7 @@ router.route("/googleregister").post((req, res) => {
               console.log(token);
               const { _id, email } = user;
               return res.json({
-                message:"user exist",
+                message: "user exist",
                 token,
                 user: { _id, email },
               });
@@ -283,9 +283,12 @@ router.route("/googleregister").post((req, res) => {
     .catch((err) => console.log(err));
   console.log("google register");
 });
-// router.route("/facebookregister").post((req, res) => {
-//   console.log("facebook register");
-// });
+
+router.route("/facebookregister").post((req, res) => {
+  console.log(req.body);
+
+  console.log("facebook register");
+});
 // router.route("/login").post((req, res) => {
 //   const validate = userMiddleware(userValidationSchema.userInfo);
 //   console.log(req.body);
