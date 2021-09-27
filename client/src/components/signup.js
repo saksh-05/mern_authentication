@@ -354,8 +354,8 @@ const Signup = () => {
               />
               <TwitterLogin
                 authCallback={authHandler}
-                consumerKey="xLYSfRJ9H8zcDcmduN6Kn11QP"
-                consumerSecret="343Ocn2uhwgGYUoXKJlCzrjEHi35rlajlmJwNExMtBywJ7IXy3"
+                consumerKey="RFu7HwI0IEuasU02qJaUVr7ji"
+                consumerSecret="ieyDVwytenpwgzrBDQzKaNLHhU9Rf0Zzon4Phrn6ASzQ8DBdnc"
                 render={(renderProps) => (
                   <Avatar
                     onClick={renderProps.onClick}
