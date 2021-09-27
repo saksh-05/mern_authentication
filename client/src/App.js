@@ -24,7 +24,7 @@ import logo from "./resources/devchallenges.svg";
 const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
 
 const App = () => {
-  const [mode, setMode] = React.useState("light");
+  const [mode, setMode] = React.useState("dark");
 
   const colorMode = React.useMemo(
     () => ({

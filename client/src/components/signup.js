@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Card,
   Box,
@@ -37,6 +37,7 @@ import TwitterLogin from "react-twitter-login";
 import GitHubLogin from "react-github-login";
 
 const Signup = () => {
+  const twitterRef = useRef();
   const theme = useTheme();
   const history = useHistory();
   const [values, setValues] = useState({
@@ -204,12 +205,75 @@ const Signup = () => {
       });
   };
 
-  const authHandler = (err, data) => {
+  const onTwitterLogin = async () => {
+    console.log(twitterRef.current);
+    // console.log(twitterRef.current.handleLoginClick);
+    const data = await twitterRef.current.handleLoginClick();
+    console.log(data);
+    // const er = await twitterRef.current.handleError(
+    //   twitterRef.current.handleLoginClick()
+    // );
+    // console.log(er);
+    // console.log(twitterRef.current.initializeProcess);
+    // const value = await twitterRef.current.initializeProcess();
+    // console.log(value);
+
+    // // const error = await twitterRef.current.handleError("error");
+    // // console.log(error);
+    // // const popup = await twitterRef.current.handleClosingPopup();
+    // // console.log(popup);
+    // const dt = await twitterRef.current;
+    // console.log(dt);
+    // const poo = await twitterRef.current.state.popup.window;
+    // console.log(poo);
+    // try {
+    //   const response = await axios.post(
+    //     `${base_url}user/twitter/oauth/request_token`
+    //   );
+
+    //   const { oauth_token } = response.data;
+    //   //Oauth Step 2
+    //   window.location.href = `https://api.twitter.com/oauth/authenticate?oauth_token=${oauth_token}`;
+    // } catch {}
+  };
+
+  const onTwitterResponse = (err, data) => {
     console.log(err, data);
   };
 
-  const onGithubResponse = (response) => console.log(response);
-  const onFailure = (response) => console.error(response);
+  const onGithubResponse = async (response) => {
+    console.log(response);
+    const { code } = response;
+    console.log(code);
+    if (code) {
+      await axios
+        .post(
+          "https://github.com/login/oauth/access_token",
+          {},
+          {
+            params: {
+              code: code ,
+              client_id: `${process.env.REACT_APP_GITHUB_CLIENT}`,
+              client_secret: `${process.env.REACT_APP_GITHUB_SECRET}`,
+            },
+          },
+          {
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+            },
+          }
+        )
+        .then((resp) => {
+          console.log(resp);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
+  const onFailure = (response) => {
+    console.error(response);
+  };
 
   return (
     <>
@@ -327,7 +391,7 @@ const Signup = () => {
               justifyContent="center"
             >
               <ReactGoogleLogin
-                clientId="147318885374-hslkg3ffdun8877mvo2u5p1dg8jgr418.apps.googleusercontent.com"
+                clientId={`${process.env.REACT_APP_GOOGLE}`}
                 render={(renderProps) => (
                   <Avatar
                     onClick={renderProps.onClick}
@@ -340,7 +404,7 @@ const Signup = () => {
                 onFailure={onGoogleResponse}
               />
               <FacebookLogin
-                appId="1034702324052153"
+                appId={`${process.env.REACT_APP_FACEBOOK_CLIENT}`}
                 autoLoad={false}
                 fields="name,email,picture"
                 callback={onFacebookResponse}
@@ -352,29 +416,32 @@ const Signup = () => {
                   />
                 )}
               />
-              <TwitterLogin
-                authCallback={authHandler}
-                consumerKey="RFu7HwI0IEuasU02qJaUVr7ji"
-                consumerSecret="ieyDVwytenpwgzrBDQzKaNLHhU9Rf0Zzon4Phrn6ASzQ8DBdnc"
-                render={(renderProps) => (
-                  <Avatar
-                    onClick={renderProps.onClick}
-                    src={Twitter}
-                    alt="twitter"
-                  />
-                )}
-              />
+              <Box sx={{ display: "none" }}>
+                <TwitterLogin
+                  authCallback={onTwitterResponse}
+                  consumerKey={`${process.env.REACT_APP_TWITTER_KEY}`}
+                  consumerSecret={`${process.env.REACT_APP_TWITTER_SECRET}`}
+                  id="twitter-login"
+                  ref={twitterRef}
+                />
+              </Box>
+              <Button
+                onClick={onTwitterLogin}
+                sx={{ padding: "0", minWidth: "unset", borderRadius: "50%" }}
+              >
+                <Avatar src={Twitter} alt="twitter" />
+              </Button>
               <GitHubLogin
-                clientId="09a20728be4cbb8db076"
+                clientId={`${process.env.REACT_APP_GITHUB_CLIENT}`}
+                redirectUri=""
+                state={`${process.env.REACT_APP_GITHUB_STATE}`}
                 onSuccess={onGithubResponse}
                 onFailure={onFailure}
-                render={(renderProps) => (
-                  <Avatar
-                    onClick={renderProps.onClick}
-                    src={Github}
-                    alt="github"
-                  />
-                )}
+              />
+              <Avatar
+                // onClick={renderProps.onClick}
+                src={Github}
+                alt="github"
               />
             </Stack>
             <Typography
