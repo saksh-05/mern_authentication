@@ -5,8 +5,8 @@ import Box from "@mui/material/Box";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
-import Signup from "./components/Signup";
-import Login from "./components/Login";
+import Signup from "./components/signup";
+import Login from "./components/login";
 import EditUser from "./components/Edituser";
 import {
   AppBar,
