@@ -248,15 +248,8 @@ const Signup = () => {
     if (code) {
       await axios
         .post(
-          "https://github.com/login/oauth/access_token",
+          `https://github.com/login/oauth/access_token?code=${code}&client_id=${process.env.REACT_APP_GITHUB_CLIENT}&client_secret=${process.env.REACT_APP_GITHUB_SECRET}`,
           {},
-          {
-            params: {
-              code: code ,
-              client_id: `${process.env.REACT_APP_GITHUB_CLIENT}`,
-              client_secret: `${process.env.REACT_APP_GITHUB_SECRET}`,
-            },
-          },
           {
             headers: {
               "Access-Control-Allow-Origin": "*",
@@ -434,7 +427,6 @@ const Signup = () => {
               <GitHubLogin
                 clientId={`${process.env.REACT_APP_GITHUB_CLIENT}`}
                 redirectUri=""
-                state={`${process.env.REACT_APP_GITHUB_STATE}`}
                 onSuccess={onGithubResponse}
                 onFailure={onFailure}
               />
