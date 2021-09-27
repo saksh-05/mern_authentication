@@ -255,10 +255,11 @@ const Signup = () => {
               code: code,
               client_id: "09a20728be4cbb8db076",
               client_secret: "475435e0b3bb53775e957c62e2dfacdd84df2c7b",
+              redirectUri: "",
             },
             headers: {
               "Access-Control-Allow-Origin": "*",
-              "Content-Type": "application/json",
+              Accept: "application/json",
             },
           }
         )
@@ -268,7 +269,7 @@ const Signup = () => {
         .catch((err) => {
           console.log(err);
         });
-    }
+    } else console.log("code not defined");
   };
   const onFailure = (response) => {
     console.error(response);
