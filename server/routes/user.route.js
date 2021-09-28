@@ -32,7 +32,7 @@ const upload = multer({ storage: storage, fileFilter });
 router
   .route("/")
   .put(upload.single("src"), (req, res) => {
-    const { id, email, password, name, bio, phone } = req.body;
+    const { email, password, name, bio, phone } = req.body;
     let src = "";
     if (req.file) {
       src = req.file.filename;
@@ -41,6 +41,7 @@ router
     //   path.join(__dirname + "/resources/" + req.file.filename)
     // );
     console.log(req.body.email);
+    console.log(req.body);
     console.log(req.file);
 
     User.findOne(
@@ -50,7 +51,7 @@ router
       (err, user) => {
         if (err || !user) {
           res.send({
-            status: 404,
+            status: true,
             message: "not found",
           });
         } else {
@@ -67,33 +68,24 @@ router
                 });
               }
               console.log(user);
+              console.log(user._id);
               const updateUserData = {
                 email: email == "" ? user.email : email,
                 password: password == "" ? user.password : hash,
                 bio: bio == "" ? user.bio : bio,
-                phone: phone == "" ? user.phone : phone,
-                src: src == "" ? user.src : src,
+                phone: phone == "" || phone.length < 10 ? user.phone : phone,
+                src: src == null ? user.src : src,
                 name: name == "" ? user.name : name,
               };
               User.findOneAndUpdate(
-                { id: id },
+                { email: email },
                 {
-                  $set: {
-                    email: updateUserData.email,
-                    name: updateUserData.name,
-                    password: updateUserData.password,
-                    src: updateUserData.src,
-                    phone: updateUserData.phone,
-                    bio: updateUserData.bio,
-
-                    // src: {
-                    //   data: fs.readFileSync(
-                    //     path.join(__dirname + "/resources/" + req.file.filename)
-                    //   ),
-                    //   contentType: "image/png",
-                    // },
-                    // src: src,
-                  },
+                  email: updateUserData.email,
+                  name: updateUserData.name,
+                  password: updateUserData.password,
+                  src: updateUserData.src,
+                  phone: updateUserData.phone,
+                  bio: updateUserData.bio,
                 }
               )
                 .then(() => {
@@ -102,7 +94,7 @@ router
                     message: "user updated",
                   });
                 })
-                .catch((err) => res.status(400).json("Error: " + err));
+                .catch((err) => console.log(err));
             });
           });
         }
@@ -111,22 +103,36 @@ router
     console.log("updated");
   })
   .get((req, res) => {
-    const { id } = req.body;
-    console.log(req.body);
-    User.findOne(
-      {
-        id,
-      },
-      (err, user) => {
-        if (user) {
-          res.send({
-            status: true,
-            message: "user found",
-            user,
-          });
+    console.log(req.query.id);
+    const { _id } = jwt.decode(req.query.id);
+    console.log(_id);
+    // console.log(req);
+    if (_id) {
+      User.findOne(
+        {
+          _id,
+        },
+        (err, user) => {
+          if (!user || err) {
+            res.send({
+              status: true,
+              message: "Incorrect detail",
+            });
+          } else {
+            res.send({
+              status: true,
+              message: "user found",
+              user,
+            });
+          }
         }
-      }
-    );
+      );
+    } else {
+      res.send({
+        message: "error",
+        status: true,
+      });
+    }
   });
 
 module.exports = router;
