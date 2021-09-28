@@ -250,7 +250,7 @@ router.route("/googleregister").post((req, res) => {
               const newUser = new User(newUserData);
               newUser
                 .save()
-                .then((user) => {
+                .then((resp) => {
                   const token = jwt.sign(
                     {
                       email,
@@ -260,7 +260,7 @@ router.route("/googleregister").post((req, res) => {
                       expiresIn: "7d",
                     }
                   );
-                  const { _id, email } = user;
+                  const { _id, email } = resp;
                   res.json({
                     message: "google added",
                     token,
@@ -284,12 +284,65 @@ router.route("/googleregister").post((req, res) => {
   console.log("google register");
 });
 
-router.route("/facebookregister").post((req, res) => {
-  const { accessToken, userID } = req.body;
+router.route("/facebookregister").get((req, res) => {
   console.log(req.body);
-  console.log(accessToken);
-  console.log(userID);
-
+  // const { accessToken, userID, email, name, picture } = req.body;
+  // console.log(accessToken, userID);
+  // User.findOne(
+  //   {
+  //     email,
+  //   },
+  //   (err, user) => {
+  //     if (err) console.log(err);
+  //     else if (user) {
+  //       if (user.password === accessToken) {
+  //         res.send({
+  //           user: { _id: user._id },
+  //           status: true,
+  //           message: "user exist",
+  //         });
+  //       }
+  //     } else {
+  //       const newUserData = {
+  //         email: email,
+  //         password: accessToken,
+  //         src: picture.data.url,
+  //         name: name,
+  //       };
+  //       const newUser = new User(newUserData);
+  //       newUser
+  //         .save()
+  //         .then((resp) => {
+  //           const token = jwt.sign(
+  //             {
+  //               email: resp.email,
+  //               password: resp.password,
+  //               src: resp.src,
+  //               name: resp.name,
+  //             },
+  //             process.env.JWT_SECRET,
+  //             {
+  //               expiresIn: "7d",
+  //             }
+  //           );
+  //           console.log(token);
+  //           res.send({
+  //             token,
+  //             status: true,
+  //             message: "facebook success",
+  //           });
+  //           // const { _id } = resp;
+  //           // res.send({
+  //           //   token,
+  //           //   user: { _id },
+  //           //   status: true,
+  //           //   message: "facebook success",
+  //           // });
+  //         })
+  //         .catch((err) => console.log(err));
+  //     }
+  //   }
+  // );
   console.log("facebook register");
 });
 // router.route("/login").post((req, res) => {
