@@ -65,11 +65,17 @@ const Edituser = (params) => {
   useEffect(() => {
     axios
       .get(`${base_url}userinfo`, {
-        id: `${params.match.params.id}`,
+        params: {
+          id: `${params.match.params.id}`,
+        },
       })
       .then((res) => {
+        const ar = res.data.user.src.split(":");
         setUserValue({
-          src: `${base_url}` + res.data.user.src,
+          src:
+            ar[0] !== "https"
+              ? `${base_url}` + res.data.user.src
+              : res.data.user.src,
           name: res.data.user.name,
           email: res.data.user.email,
           password: res.data.user.password,
@@ -80,7 +86,7 @@ const Edituser = (params) => {
         console.log(res);
       })
       .catch((err) => console.log(err));
-  });
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -95,8 +101,9 @@ const Edituser = (params) => {
     formData.append("bio", userValues.bio);
     formData.append("phone", userValues.phone);
 
-    console.log(userValues.src);
-    console.log(formData.get("src"));
+    console.log(userValues);
+    // console.log(userValues.src);
+    // console.log(formData.get("src"));
 
     if (emailValid && phoneValid) {
       await axios

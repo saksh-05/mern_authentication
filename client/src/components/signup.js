@@ -191,13 +191,33 @@ const Signup = () => {
   const onFacebookResponse = async (response) => {
     console.log(response);
     const { userID, accessToken, email, name, picture } = response;
-    // console.log(userID);
-    // console.log(accessToken);
     await axios
-      .get(`${base_url}user/facebookregister`, {
-        accessToken: accessToken,
+      .post(`${base_url}user/facebookregister`, {
+        userID,
+        accessToken,
+        name,
+        email,
+        picture,
       })
-      .then((res) => console.log(res))
+      .then((res) => {
+        console.log(res);
+        if (res.data.message === "Incorrect password") {
+          setSnack({
+            ...snack,
+            fault: true,
+            message: "Facebook login error! try again",
+            severity: "error",
+          });
+        } else {
+          console.log(res.data.token);
+          history.push({
+            pathname: `/userInfo/${res.data.token}`,
+            params: {
+              fault: true,
+            },
+          });
+        }
+      })
       .catch((err) => console.log(err));
   };
 

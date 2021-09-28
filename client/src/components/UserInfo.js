@@ -43,16 +43,21 @@ const UserInfo = (params) => {
   useEffect(() => {
     axios
       .get(`${base_url}userinfo`, {
-        id: `${params.match.params.id}`,
+        params: {
+          id: `${params.match.params.id}`,
+        },
       })
       .then((res) => {
+        const { bio, name, email, phone, src } = res.data.user;
+        console.log(bio, name, email,phone);
+        const ar = src.split(":");
+        console.log(ar[0]);
         setUserValue({
-          src: `${base_url}` + res.data.user.src,
-          name: res.data.user.name,
-          email: res.data.user.email,
-          password: res.data.user.password,
-          bio: res.data.user.bio,
-          phone: res.data.user.phone,
+          src: ar[0] !== "https" ? `${base_url}` + userValues.src : src,
+          name: name === "undefined" ? "" : name,
+          email: email === "undefined" ? "" : res.data.user.email,
+          bio: bio === "undefined" ? "" : bio,
+          phone:( phone === "undefined" || phone.length < 10 )? "" : phone,
         });
         console.log(userValues);
         console.log(res);
@@ -93,7 +98,7 @@ const UserInfo = (params) => {
         style={{
           color: "white",
           position: "relative",
-          top: "-6rem",
+          top: "-5rem",
           width: "12%",
           marginLeft: "auto",
           right: "9rem",
