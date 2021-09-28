@@ -191,10 +191,12 @@ const Signup = () => {
   const onFacebookResponse = (response) => {
     console.log(response);
     const { userID, accessToken } = response;
+    console.log(userID);
+    console.log(accessToken);
     axios
       .post(`${base_url}user/facebookregister`, {
-        userID,
-        accessToken,
+        userID: userID,
+        accessToken: accessToken,
       })
       .then((res) => {
         console.log(res.data);
