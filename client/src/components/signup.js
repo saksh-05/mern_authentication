@@ -159,7 +159,7 @@ const Signup = () => {
   const onGoogleResponse = async (resp) => {
     console.log(resp);
     await axios
-      .post(`${base_url}user/googleregister`, {
+      .get(`${base_url}user/googleregister`, {
         idToken: resp.tokenId,
       })
       .then((res) => {
@@ -188,23 +188,17 @@ const Signup = () => {
       });
   };
 
-  const onFacebookResponse = (response) => {
+  const onFacebookResponse = async (response) => {
     console.log(response);
-    const { userID, accessToken } = response;
-    console.log(userID);
-    console.log(accessToken);
-    axios
-      .post(`${base_url}user/facebookregister`, {
-        userID: userID,
+    const { userID, accessToken, email, name, picture } = response;
+    // console.log(userID);
+    // console.log(accessToken);
+    await axios
+      .get(`${base_url}user/facebookregister`, {
         accessToken: accessToken,
       })
-      .then((res) => {
-        console.log(res.data);
-        // informParent(res);
-      })
-      .catch((error) => {
-        console.log("FACEBOOK SIGNIN ERROR", error.response);
-      });
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
   };
 
   const onTwitterLogin = async () => {
