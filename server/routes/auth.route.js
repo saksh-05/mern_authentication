@@ -285,7 +285,10 @@ router.route("/googleregister").post((req, res) => {
 });
 
 router.route("/facebookregister").post((req, res) => {
+  const { accessToken, userID } = req.body;
   console.log(req.body);
+  console.log(accessToken);
+  console.log(userID);
 
   console.log("facebook register");
 });
