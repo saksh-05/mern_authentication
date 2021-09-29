@@ -159,19 +159,23 @@ const Signup = () => {
   const onGoogleResponse = async (resp) => {
     console.log(resp);
     await axios
-      .get(`${base_url}user/googleregister`, {
+      .post(`${base_url}user/googleregister`, {
         idToken: resp.tokenId,
       })
       .then((res) => {
         console.log(res);
-        if (res.data.message === "google added") {
-          // history.push({
-          //   pathname: "/userInfo",
-          //   params: {
-          //     fault: true,
-          //     message: "User signup success",
-          //   },
-          // });
+        if (
+          res.data.message === "google added" ||
+          res.data.message === "user exist"
+        ) {
+          console.log("success");
+          history.push({
+            pathname: `/userInfo/${res.data.token}`,
+            params: {
+              fault: true,
+              message: "User signup success",
+            },
+          });
           // ${res.data.user._id}
         } else {
           history.push("/login");
@@ -262,30 +266,46 @@ const Signup = () => {
     const { code } = response;
     console.log(code);
     if (code) {
-      await axios
-        .post(
-          "https://github.com/login/oauth/access_token/",
-          {},
-          {
-            params: {
-              code: code,
-              client_id: "09a20728be4cbb8db076",
-              client_secret: "475435e0b3bb53775e957c62e2dfacdd84df2c7b",
-              redirectUri: "",
-            },
-            headers: {
-              "Access-Control-Allow-Origin": "*",
-              Accept: "application/json",
-            },
+      const act = await axios.get(
+        "https://github.com/login/oauth/access_token",
+        {
+          params: {
+            code: { code },
+            client_id: `${process.env.REACT_APP_GITHUB_CLIENT}`,
+            client_secret: `${process.env.REACT_APP_GITHUB__SECRET}`,
+          },
+          headers:{
+            'Access-Control-Allow-Origin' : '*',
           }
-        )
-        .then((resp) => {
-          console.log(resp);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    } else console.log("code not defined");
+        }
+      );
+      console.log(act);
+    }
+    // if (code) {
+    //   await axios
+    //     .post(
+    //       "https://github.com/login/oauth/access_token/",
+    //       {},
+    //       {
+    //         params: {
+    //           code: code,
+    //           client_id: "09a20728be4cbb8db076",
+    //           client_secret: "475435e0b3bb53775e957c62e2dfacdd84df2c7b",
+    //           redirectUri: "",
+    //         },
+    //         headers: {
+    //           "Access-Control-Allow-Origin": "*",
+    //           Accept: "application/json",
+    //         },
+    //       }
+    //     )
+    //     .then((resp) => {
+    //       console.log(resp);
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //     });
+    // } else console.log("code not defined");
   };
   const onFailure = (response) => {
     console.error(response);

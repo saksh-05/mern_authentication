@@ -19,6 +19,7 @@ import GroupIcon from "@mui/icons-material/Group";
 import logo from "../resources/devchallenges.svg";
 import { useHistory } from "react-router";
 import base_url from "../devpro/baseurl";
+import { signout } from "../auth/auth";
 
 const UserInfo = (params) => {
   console.log(params);
@@ -26,7 +27,7 @@ const UserInfo = (params) => {
   const history = useHistory();
 
   const [userValues, setUserValue] = useState({
-    src: "",
+    src: {AccountCircle},
     name: "",
     bio: "",
     phone: "",
@@ -49,15 +50,15 @@ const UserInfo = (params) => {
       })
       .then((res) => {
         const { bio, name, email, phone, src } = res.data.user;
-        console.log(bio, name, email,phone);
+        console.log(bio, name, email, phone);
         const ar = src.split(":");
         console.log(ar[0]);
         setUserValue({
-          src: ar[0] !== "https" ? `${base_url}` + userValues.src : src,
-          name: name === "undefined" ? "" : name,
-          email: email === "undefined" ? "" : res.data.user.email,
-          bio: bio === "undefined" ? "" : bio,
-          phone:( phone === "undefined" || phone.length < 10 )? "" : phone,
+          src: ar[0] !== "https" ? `${base_url}` + ar[0] : src,
+          name: name === undefined ? userValues.name : name,
+          email: email === undefined ? userValues.email : email,
+          bio: bio === undefined || bio === "undefined" ? userValues.bio : bio,
+          phone: phone === undefined ? userValues.phone : phone,
         });
         console.log(userValues);
         console.log(res);
@@ -139,7 +140,14 @@ const UserInfo = (params) => {
             Group chat
           </MenuItem>
           <Divider />
-          <MenuItem onClick={handleCloseMenu}>
+          <MenuItem
+            onClick={() => {
+              setAnchorEl(null);
+              signout(() => {
+                history.push("/");
+              });
+            }}
+          >
             <LogoutIcon sx={{ marginRight: "1rem" }} />
             logout
           </MenuItem>

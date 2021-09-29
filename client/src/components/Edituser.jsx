@@ -30,7 +30,7 @@ const Edituser = (params) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const history = useHistory();
   const [userValues, setUserValue] = useState({
-    src: null,
+    src: "",
     name: "",
     bio: "",
     phone: "",
@@ -62,31 +62,31 @@ const Edituser = (params) => {
     }
   };
 
-  useEffect(() => {
-    axios
-      .get(`${base_url}userinfo`, {
-        params: {
-          id: `${params.match.params.id}`,
-        },
-      })
-      .then((res) => {
-        const ar = res.data.user.src.split(":");
-        setUserValue({
-          src:
-            ar[0] !== "https"
-              ? `${base_url}` + res.data.user.src
-              : res.data.user.src,
-          name: res.data.user.name,
-          email: res.data.user.email,
-          password: res.data.user.password,
-          bio: res.data.user.bio,
-          phone: res.data.user.phone,
-        });
-        console.log(userValues);
-        console.log(res);
-      })
-      .catch((err) => console.log(err));
-  }, []);
+  // useEffect(() => {
+  //   axios
+  //     .get(`${base_url}userinfo`, {
+  //       params: {
+  //         id: `${params.match.params.id}`,
+  //       },
+  //     })
+  //     .then((res) => {
+  //       const ar = res.data.user.src.split(":");
+  //       setUserValue({
+  //         src:
+  //           ar[0] !== "https"
+  //             ? `${base_url}` + res.data.user.src
+  //             : res.data.user.src,
+  //         name: res.data.user.name,
+  //         email: res.data.user.email,
+  //         password: res.data.user.password,
+  //         bio: res.data.user.bio,
+  //         phone: res.data.user.phone,
+  //       });
+  //       console.log(userValues);
+  //       console.log(res);
+  //     })
+  //     .catch((err) => console.log(err));
+  // }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -94,6 +94,7 @@ const Edituser = (params) => {
     const phoneValid = await userPhoneSchema.isValid(userValues);
 
     let formData = new FormData();
+    formData.append("id", `${params.match.params.id}`);
     formData.append("src", userValues.src);
     formData.append("email", userValues.email);
     formData.append("password", userValues.password);
