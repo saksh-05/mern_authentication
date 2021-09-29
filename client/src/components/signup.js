@@ -266,20 +266,22 @@ const Signup = () => {
     const { code } = response;
     console.log(code);
     if (code) {
-      const act = await axios.get(
-        "https://github.com/login/oauth/access_token",
-        {
+      await axios
+        .get("https://github.com/login/oauth/access_token", {
           params: {
-            code: { code },
+            code: code,
             client_id: `${process.env.REACT_APP_GITHUB_CLIENT}`,
-            client_secret: `${process.env.REACT_APP_GITHUB__SECRET}`,
+            client_secret: `${process.env.REACT_APP_GITHUB_SECRET}`,
           },
-          headers:{
-            'Access-Control-Allow-Origin' : '*',
-          }
-        }
-      );
-      console.log(act);
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+            "Access-Control-Allow-Headers":
+              "Origin, Content-Type, X-Auth-Token",
+          },
+        })
+        .then((res) => console.log(res))
+        .catch((err) => console.log(err));
     }
     // if (code) {
     //   await axios
