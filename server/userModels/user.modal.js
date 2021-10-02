@@ -9,6 +9,7 @@ const userSchema = new Schema({
   phone: Number,
   bio: String,
   src: String,
+  twitterId:String,
   date: { type: Date, default: Date.now },
 });
 

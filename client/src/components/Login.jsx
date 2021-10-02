@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Card,
   Box,
@@ -8,8 +8,6 @@ import {
   FormControl,
   InputAdornment,
   IconButton,
-  InputLabel,
-  OutlinedInput,
   Stack,
   Avatar,
   Alert,
@@ -29,24 +27,36 @@ import { useTheme } from "@emotion/react";
 import dlogo from "../resources/devchallenges-light.svg";
 import axios from "axios";
 import { userEmailSchema, userPasswordSchema } from "./UserValidation";
-import base_url from "../devpro/baseurl";
+import base_url from "../devpro/Baseurl";
 import { useHistory } from "react-router";
 import { authenticate, isAuth } from "../auth/auth";
 import ReactGoogleLogin from "react-google-login";
+import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
+import TwitterLogin from "react-twitter-login";
+import GitHubLogin from "react-github-login";
+import { update } from "../../../server/userModels/user.modal";
 
 const Login = (params) => {
+  const twitterRef = useRef();
+  const gitRef = useRef();
   const theme = useTheme();
+  const history = useHistory();
+
   const [values, setValues] = useState({
     email: "",
     password: "",
     showpassword: false,
   });
+
   const [snack, setSnack] = useState({
     fault: false,
     message: "",
-    severity: "",
+    severity: "success",
   });
-  const history = useHistory();
+
+  const updateSnack = (msg, svrt) => {
+    setSnack({ ...snack, fault: true, message: msg, severity: svrt });
+  };
 
   const handleChange = (prop) => (event) => {
     setValues({ ...values, [prop]: event.target.value });
@@ -64,14 +74,11 @@ const Login = (params) => {
   };
 
   const handleHelperShow = async (e) => {
-    console.log(e.target.id);
-
     if (e.target.id === "outlined-email") {
       e.target.value === ""
         ? setValues({ ...values, emailHelperShow: true })
         : console.log("nothing");
       const emailValid = await userEmailSchema.isValid(values);
-      console.log("emailValid", emailValid);
       emailValid
         ? setValues({ ...values, emailHelperShow: false })
         : console.log("nothing");
@@ -82,16 +89,27 @@ const Login = (params) => {
         ? setValues({ ...values, passwordHelperShow: true })
         : console.log("nothing");
       const passwordValid = await userPasswordSchema.isValid(values);
-      console.log("passwordValid", passwordValid);
       passwordValid
         ? setValues({ ...values, passwordHelperShow: false })
-        : console.log("error gone?");
+        : console.log("nothing");
     }
   };
 
   const handleClose = () => {
     setSnack({ ...snack, fault: false });
   };
+
+  useEffect(() => {
+    if (params.location.params !== undefined) {
+      updateSnack(params.location.params.message, "info");
+      // setSnack({
+      //   ...snack,
+      //   fault: true,
+      //   message: params.location.params.message,
+      //   severity: "info",
+      // });
+    }
+  }, [params.location.params, snack]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -104,16 +122,8 @@ const Login = (params) => {
           password: values.password,
         })
         .then((res) => {
-          // console.log(res);
-
           if (res.data.message === "success") {
-            console.log(res.data);
             authenticate(res, () => {
-              setValues({
-                ...values,
-                email: "",
-                password: "",
-              });
               isAuth()
                 ? history.push({
                     pathname: `/userInfo/${res.data.user._id}`,
@@ -121,87 +131,224 @@ const Login = (params) => {
                       fault: true,
                     },
                   })
-                : setSnack({
-                    ...snack,
-                    fault: true,
-                    message: "Enter correct detail",
-                    severity: "error",
-                  });
+                : updateSnack("Enter correct detail", "error");
+              // setSnack({
+              //     ...snack,
+              //     fault: true,
+              //     message: "Enter correct detail",
+              //     severity: "error",
+              //   });
             });
-            console.log(res.data.message);
           } else if (res.data.message === "not found") {
-            setSnack({
-              ...snack,
-              fault: true,
-              message: "User does not exist please signup",
-              severity: "error",
-            });
-          } else {
-            setSnack({
-              ...snack,
-              fault: true,
-              message: "Incorrect password",
-              severity: "error",
-            });
-            console.log(res.data.message);
+            updateSnack("User not found, Singup please", "info");
             // history.push({
-            //   pathname: "/login",
-            //   message: res.data.message,
+            //   pathname: "/",
+            //   params: {
+            //     logout: false,
+            //     message: "signup",
+            //   },
+            // });
+          } else {
+            updateSnack("Incorrect password", "error");
+            // setSnack({
+            //   ...snack,
+            //   fault: true,
+            //   message: "Incorrect password",
+            //   severity: "error",
             // });
           }
         })
         .catch((err) => {
-          console.log("error" + err);
+          updateSnack("Login error, try again", "error");
+          // setSnack({
+          //   ...snack,
+          //   fault: true,
+          //   message: "Login error! try again",
+          //   severity: "error",
+          // });
         });
     } else {
-      setSnack({
-        ...snack,
-        fault: true,
-        message: "Enter correct detail",
-        severity: "error",
-      });
+      updateSnack("Enter correct detail", "error");
+      // setSnack({
+      //   ...snack,
+      //   fault: true,
+      //   message: "Enter correct detail",
+      //   severity: "error",
+      // });
     }
-    console.log("submitting");
   };
-  console.log(params.location.params);
 
-  useEffect(() => {
-    if (params.location.params !== undefined) {
-      setSnack({
-        ...snack,
-        fault: true,
-        message: params.location.params.message,
-        severity: "info",
-      });
-    }
-  }, [params.location.params]);
-
-  const onResponse = async (resp) => {
-    console.log(resp);
+  const onGoogleResponse = async (resp) => {
     await axios
       .post(`${base_url}user/googleregister`, {
         idToken: resp.tokenId,
       })
       .then((res) => {
-        console.log(res);
-        history.push({
-          pathname: "/userInfo",
-          params: {
-            fault: true,
-            message: "User signup success",
-          },
-        });
+        if (
+          res.data.message === "google added" ||
+          res.data.message === "user exist"
+        ) {
+          updateSnack("Success login", "signup");
+          history.push({
+            pathname: `/userInfo/${res.data.token}`,
+            params: {
+              fault: true,
+              message: "User signup success",
+            },
+          });
+        } else {
+          updateSnack("Google signin error try again", "error");
+
+          // history.push("/login");
+          // setSnack({
+          //   ...snack,
+          //   fault: true,
+          //   message: "Google login error",
+          //   severity: "error",
+          // });
+        }
       })
       .catch((err) => {
-        console.log(err);
+        updateSnack("Google singin error, try again", "error");
+
+        setSnack({
+          ...snack,
+          fault: true,
+          message: "Google login error! try again",
+          severity: "error",
+        });
       });
+  };
+
+  const onFacebookResponse = async (response) => {
+    const { userID, accessToken, email, name, picture } = response;
+    await axios
+      .post(`${base_url}user/facebookregister`, {
+        userID,
+        accessToken,
+        name,
+        email,
+        picture,
+      })
+      .then((res) => {
+        if (res.data.message === "Incorrect password") {
+          updateSnack("Facebook login error, try again", "error");
+
+          // setSnack({
+          //   ...snack,
+          //   fault: true,
+          //   message: "Facebook login error! try again",
+          //   severity: "error",
+          // });
+        } else {
+          updateSnack("Success login", "success");
+
+          history.push({
+            pathname: `/userInfo/${res.data.token}`,
+            params: {
+              fault: true,
+            },
+          });
+        }
+      })
+      .catch((err) => {
+        updateSnack("Facebook login error, try again", "error");
+
+        // setSnack({
+        //   ...snack,
+        //   fault: true,
+        //   message: "Facebook login error! try again",
+        //   severity: "error",
+        // });
+      });
+  };
+
+  const onTwitterLogin = async () => {
+    await twitterRef.current.handleLoginClick();
+  };
+
+  const onTwitterResponse = async (err, data) => {
+    const { user_id } = data;
+    await axios
+      .post(`${base_url}user/twitterregister`, {
+        id: user_id,
+      })
+      .then((resp) => {
+        if (
+          resp.data.message === "user exist" ||
+          resp.data.message === "twitter success"
+        ) {
+          history.push({
+            pathname: `/userInfo/${resp.data.token}`,
+            params: {
+              fault: true,
+            },
+          });
+        } else {
+          setSnack({
+            ...snack,
+            fault: true,
+            message: "Twitter login error! try again",
+            severity: "error",
+          });
+        }
+      })
+      .catch((err) => {
+        setSnack({
+          ...snack,
+          fault: true,
+          message: "Twitter login error! try again",
+          severity: "error",
+        });
+      });
+  };
+
+  const onGithubResponse = async (response) => {
+    const { code } = response;
+    await axios
+      .post(`${base_url}user/githubregister`, {
+        code: code,
+      })
+      .then((resp) => {
+        if (
+          resp.data.message === "user exist" ||
+          resp.data.message === "github success"
+        ) {
+          history.push({
+            pathname: `/userInfo/${resp.data.token}`,
+            params: {
+              fault: true,
+            },
+          });
+        } else {
+          setSnack({
+            ...snack,
+            fault: true,
+            message: "Github login error! try again",
+            severity: "error",
+          });
+        }
+      })
+      .catch((err) => {
+        setSnack({
+          ...snack,
+          fault: true,
+          message: err,
+          severity: "error",
+        });
+      });
+  };
+  const onFailure = (response) => {
+    console.error(response);
+  };
+  const onGithubLogin = async () => {
+    await gitRef.current.onBtnClick();
   };
 
   return (
     <>
       <Card sx={{ mx: "auto", width: "40%", p: 4, textAlign: "left" }}>
         <CardContent>
-          {console.log(theme.palette.mode)}
           {theme.palette.mode === "light" ? (
             <img src={logo} alt="logo" />
           ) : (
@@ -235,7 +382,7 @@ const Login = (params) => {
             </FormControl>
             <FormControl sx={{ mb: 3, width: "100%" }} variant="outlined">
               <TextField
-                autocomplete
+                autoComplete="true"
                 required
                 id="outlined-password"
                 type={values.showPassword ? "text" : "password"}
@@ -307,7 +454,7 @@ const Login = (params) => {
               justifyContent="center"
             >
               <ReactGoogleLogin
-                clientId="147318885374-hslkg3ffdun8877mvo2u5p1dg8jgr418.apps.googleusercontent.com"
+                clientId={`${process.env.REACT_APP_GOOGLE}`}
                 render={(renderProps) => (
                   <Avatar
                     onClick={renderProps.onClick}
@@ -316,12 +463,47 @@ const Login = (params) => {
                   />
                 )}
                 buttonText=""
-                onSuccess={onResponse}
-                onFailure={onResponse}
+                onSuccess={onGoogleResponse}
+                onFailure={onGoogleResponse}
               />
-              {/* <FacebookSignup />
-              <Twitter />
-              <GitHub /> */}
+              <FacebookLogin
+                appId={`${process.env.REACT_APP_FACEBOOK_CLIENT}`}
+                autoLoad={false}
+                fields="name,email,picture"
+                callback={onFacebookResponse}
+                render={(renderProps) => (
+                  <Avatar
+                    onClick={renderProps.onClick}
+                    src={Facebook}
+                    alt="facebook"
+                  />
+                )}
+              />
+              <Box sx={{ display: "none" }}>
+                <TwitterLogin
+                  authCallback={onTwitterResponse}
+                  consumerKey={`${process.env.REACT_APP_TWITTER_KEY}`}
+                  consumerSecret={`${process.env.REACT_APP_TWITTER_SECRET}`}
+                  id="twitter-login"
+                  ref={twitterRef}
+                />
+              </Box>
+              <Button
+                onClick={onTwitterLogin}
+                sx={{ padding: "0", minWidth: "unset", borderRadius: "50%" }}
+              >
+                <Avatar src={Twitter} alt="twitter" />
+              </Button>
+              <Box sx={{ display: "none" }}>
+                <GitHubLogin
+                  clientId={`${process.env.REACT_APP_GITHUB_CLIENT}`}
+                  redirectUri=""
+                  onSuccess={onGithubResponse}
+                  onFailure={onFailure}
+                  ref={gitRef}
+                />
+              </Box>
+              <Avatar onClick={onGithubLogin} src={Github} alt="github" />
             </Stack>
             <Typography
               variant="caption"
@@ -337,7 +519,7 @@ const Login = (params) => {
               Already a member?
               <span
                 onClick={() => {
-                  history.push("/signup");
+                  history.push("/");
                 }}
                 style={{
                   color: "#3f50b5",
@@ -358,6 +540,8 @@ const Login = (params) => {
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert variant="filled" severity={snack.severity} onClose={handleClose}>
+          {snack.severity}
+          {" : "}
           {snack.message}
         </Alert>
       </Snackbar>
@@ -366,3 +550,9 @@ const Login = (params) => {
 };
 
 export default Login;
+
+
+
+
+
+

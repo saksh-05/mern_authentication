@@ -16,9 +16,8 @@ import axios from "axios";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import GroupIcon from "@mui/icons-material/Group";
-import logo from "../resources/devchallenges.svg";
 import { useHistory } from "react-router";
-import base_url from "../devpro/baseurl";
+import base_url from "../devpro/Baseurl";
 import { signout } from "../auth/auth";
 
 const UserInfo = (params) => {
@@ -26,8 +25,10 @@ const UserInfo = (params) => {
   const theme = useTheme();
   const history = useHistory();
 
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
   const [userValues, setUserValue] = useState({
-    src: {AccountCircle},
+    src: "../resources/devchallenges.svg",
     name: "",
     bio: "",
     phone: "",
@@ -38,48 +39,14 @@ const UserInfo = (params) => {
   const [snack, setSnack] = useState({
     fault: false,
     message: "",
-    severity: "",
+    severity: "success",
   });
 
-  useEffect(() => {
-    axios
-      .get(`${base_url}userinfo`, {
-        params: {
-          id: `${params.match.params.id}`,
-        },
-      })
-      .then((res) => {
-        const { bio, name, email, phone, src } = res.data.user;
-        console.log(bio, name, email, phone);
-        const ar = src.split(":");
-        console.log(ar[0]);
-        setUserValue({
-          src: ar[0] !== "https" ? `${base_url}` + ar[0] : src,
-          name: name === undefined ? userValues.name : name,
-          email: email === undefined ? userValues.email : email,
-          bio: bio === undefined || bio === "undefined" ? userValues.bio : bio,
-          phone: phone === undefined ? userValues.phone : phone,
-        });
-        console.log(userValues);
-        console.log(res);
-      })
-      .catch((err) => console.log(err));
-
-    if (params.location.params !== undefined) {
-      setSnack({
-        ...snack,
-        fault: true,
-        message: "Success login",
-        severity: "success",
-      });
-    }
-  }, [params.location.params]);
+  var update = params.location.state;
 
   const handleClose = () => {
     setSnack({ ...snack, fault: false });
   };
-
-  const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -88,10 +55,61 @@ const UserInfo = (params) => {
   const handleCloseMenu = () => {
     setAnchorEl(null);
   };
-  // if(!params.location.params.fault){
-  //   setSnack({...snack,fault:})
 
-  // }
+  const updateSnack = (msg) => {
+    console.log(msg);
+    setSnack({
+      ...snack,
+      fault: true,
+      message: msg,
+      severity: "success",
+    });
+    setTimeout(() => {
+      setSnack({
+        ...snack,
+        fault: false,
+      });
+      params.location.state = false;
+    }, 3000);
+  };
+
+  useEffect(() => {
+    async function getUser() {
+      await axios
+        .get(`${base_url}userinfo`, {
+          params: {
+            id: `${params.match.params.id}`,
+          },
+        })
+        .then((res) => {
+          const { bio, name, email, phone, src } = res.data.user;
+          console.log(bio, name, email, phone);
+          const ar = src.startsWith("https://") ? src.split(":") : src;
+          console.log(ar[0]);
+          setUserValue({
+            src: ar[0] !== "https" ? `${base_url}` + ar[0] : src,
+            name: name === undefined ? userValues.name : name,
+            email: email === undefined ? userValues.email : email,
+            bio:
+              bio === undefined || bio === "undefined" ? userValues.bio : bio,
+            phone: phone === undefined ? userValues.phone : phone,
+          });
+          console.log(userValues);
+          console.log(res);
+        })
+        .catch((err) => console.log(err));
+
+      if (params.location.params !== undefined) {
+        updateSnack("Success login");
+      }
+      if (update) {
+        updateSnack("Update Success");
+      }
+      console.log("user info useeffect");
+    }
+    getUser();
+    console.log("user info ");
+  }, [params.location.params, params.match.params.id]);
 
   return (
     <>
@@ -144,7 +162,13 @@ const UserInfo = (params) => {
             onClick={() => {
               setAnchorEl(null);
               signout(() => {
-                history.push("/");
+                history.push({
+                  pathname: "/",
+                  params: {
+                    fault: true,
+                    message: "logout",
+                  },
+                });
               });
             }}
           >
@@ -154,7 +178,7 @@ const UserInfo = (params) => {
         </Menu>
       </div>
 
-      <Box>
+      <Box sx={{ position: "relative", top: "-3rem" }}>
         <Typography
           variant="h2"
           sx={{
@@ -206,7 +230,9 @@ const UserInfo = (params) => {
                 border: "1px solid #828282",
               }}
               onClick={() => {
-                history.push(`/editUser/${params.match.params.id}`);
+                history.push({
+                  pathname: `/editUser/${params.match.params.id}`,
+                });
               }}
             >
               Edit
@@ -354,6 +380,8 @@ const UserInfo = (params) => {
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert variant="filled" severity={snack.severity} onClose={handleClose}>
+          {snack.severity}
+          {" : "}
           {snack.message}
         </Alert>
       </Snackbar>

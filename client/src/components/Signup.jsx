@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Card,
   Box,
@@ -8,8 +8,6 @@ import {
   FormControl,
   InputAdornment,
   IconButton,
-  InputLabel,
-  OutlinedInput,
   Stack,
   Avatar,
   TextField,
@@ -24,7 +22,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import { useTheme } from "@emotion/react";
 import dlogo from "../resources/devchallenges-light.svg";
 import axios from "axios";
-import base_url from "../devpro/baseurl";
+import base_url from "../devpro/Baseurl";
 import { userEmailSchema, userPasswordSchema } from "./UserValidation";
 import { useHistory } from "react-router-dom";
 import Facebook from "../resources/Facebook.svg";
@@ -36,8 +34,10 @@ import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props
 import TwitterLogin from "react-twitter-login";
 import GitHubLogin from "react-github-login";
 
-const Signup = () => {
+const Signup = (props) => {
+  console.log(props);
   const twitterRef = useRef();
+  const gitRef = useRef();
   const theme = useTheme();
   const history = useHistory();
   const [values, setValues] = useState({
@@ -50,8 +50,31 @@ const Signup = () => {
   const [snack, setSnack] = useState({
     fault: false,
     message: "",
-    severity: "",
+    severity: "success",
   });
+
+  const updateSnack = (msg, svrt) => {
+    setSnack({ ...snack, fault: true, message: msg, severity: svrt });
+  };
+
+  useEffect(() => {
+    if (props.location.params !== undefined) {
+      // if (props.location.params.message === "signup") {
+      //   updateSnack('User not found singup','error');
+      //   setSnack({
+      //     ...snack,
+      //     fault: true,
+      //     message: "User not found signup",
+      //     severity: "error",
+      //   });
+      // } else
+      if (props.location.params.message === "logout") {
+        updateSnack("Logged out", "success");
+      }
+      console.log("snack change");
+    }
+    console.log(snack);
+  }, [props.location.params]);
 
   const handleChange = (prop) => async (event) => {
     setValues({ ...values, [prop]: event.target.value });
@@ -69,14 +92,11 @@ const Signup = () => {
   };
 
   const handleHelperShow = async (e) => {
-    console.log(e.target.id);
-
     if (e.target.id === "outlined-email") {
       e.target.value === ""
         ? setValues({ ...values, emailHelperShow: true })
         : console.log("nothing");
       const emailValid = await userEmailSchema.isValid(values);
-      console.log("emailValid", emailValid);
       emailValid
         ? setValues({ ...values, emailHelperShow: false })
         : console.log("nothing");
@@ -87,10 +107,9 @@ const Signup = () => {
         ? setValues({ ...values, passwordHelperShow: true })
         : console.log("nothing");
       const passwordValid = await userPasswordSchema.isValid(values);
-      console.log("passwordValid", passwordValid);
       passwordValid
         ? setValues({ ...values, passwordHelperShow: false })
-        : console.log("error gone?");
+        : console.log("nothing");
     }
   };
   const handleClose = () => {
@@ -108,7 +127,6 @@ const Signup = () => {
           password: values.password,
         })
         .then((res) => {
-          console.log(res);
           if (res.data.message === "user exist") {
             history.push({
               pathname: "/login",
@@ -117,58 +135,57 @@ const Signup = () => {
                 message: "User exist please login",
               },
             });
+            // } else if (res.data.message === "new user") {
+            // setSnack({
+            //   ...snack,
+            //   fault: true,
+            //   message: " for verification",
+            //   severity: "success",
+            // });
+          } else {
+            updateSnack("Check your email", "success");
+
+            // updateSnack('Login error try again','error')
+
+            // setSnack({
+            //   ...snack,
+            //   fault: true,
+            //   message: "login error try again",
+            //   severity: "error",
+            // });
           }
-          // if (res.data.status === true) {
-          //   if (res.data.message === "user added") {
-          //     console.log(res.data.message);
-          //     setSnack({
-          //       ...snack,
-          //       fault: true,
-          //       message: res.data.message,
-          //       severity: "success",
-          //     });
-          //     // <Alert severity="success">You are loggedin</Alert>;
-          //     history.push("/userInfo");
-          //   } else {
-          //     console.log(res.data.message);
-          //     history.push({
-          //       pathname: "/login",
-          //       message: res.data.message,
-          //     });
-          //   }
-          // } else {
-          //   setSnack({ ...snack, fault: true, message: res.data.message });
-          //   // <Alert severity="error">Incorrect password</Alert>;
-          //   console.log(res.data.message);
-          // }
         })
         .catch((err) => {
-          console.log("error" + err);
+          updateSnack(err, "error");
+          // setSnack({
+          //   ...snack,
+          //   fault: true,
+          //   message: err,
+          //   severity: "error",
+          // });
         });
     } else {
-      setSnack({
-        ...snack,
-        fault: true,
-        message: "Enter correct detail",
-        severity: "error",
-      });
+      updateSnack("Enter correct detail", "error");
+      // setSnack({
+      //   ...snack,
+      //   fault: true,
+      //   message: "Enter correct detail",
+      //   severity: "error",
+      // });
     }
-    console.log("submitting");
   };
 
   const onGoogleResponse = async (resp) => {
-    console.log(resp);
     await axios
       .post(`${base_url}user/googleregister`, {
         idToken: resp.tokenId,
       })
       .then((res) => {
-        console.log(res);
         if (
           res.data.message === "google added" ||
           res.data.message === "user exist"
         ) {
-          console.log("success");
+          updateSnack("Success login", "success");
           history.push({
             pathname: `/userInfo/${res.data.token}`,
             params: {
@@ -176,24 +193,23 @@ const Signup = () => {
               message: "User signup success",
             },
           });
-          // ${res.data.user._id}
         } else {
-          history.push("/login");
-          setSnack({
-            ...snack,
-            fault: true,
-            message: "User already exist",
-            severity: "error",
-          });
+          updateSnack("Google signin error try again", "error");
+          // history.push("/login");
+          // setSnack({
+          //   ...snack,
+          //   fault: true,
+          //   message: "User already exist",
+          //   severity: "error",
+          // });
         }
       })
       .catch((err) => {
-        console.log(err);
+        updateSnack("Google singin error, try again", "error");
       });
   };
 
   const onFacebookResponse = async (response) => {
-    console.log(response);
     const { userID, accessToken, email, name, picture } = response;
     await axios
       .post(`${base_url}user/facebookregister`, {
@@ -204,16 +220,16 @@ const Signup = () => {
         picture,
       })
       .then((res) => {
-        console.log(res);
         if (res.data.message === "Incorrect password") {
-          setSnack({
-            ...snack,
-            fault: true,
-            message: "Facebook login error! try again",
-            severity: "error",
-          });
+          updateSnack("Facebook login error, try again", "error");
+          // setSnack({
+          //   ...snack,
+          //   fault: true,
+          //   message: "Facebook login error! try again",
+          //   severity: "error",
+          // });
         } else {
-          console.log(res.data.token);
+          updateSnack("Success login", "success");
           history.push({
             pathname: `/userInfo/${res.data.token}`,
             params: {
@@ -222,102 +238,107 @@ const Signup = () => {
           });
         }
       })
-      .catch((err) => console.log(err));
+      .catch((err) => updateSnack("Facebook login error, try again", "error"));
   };
 
   const onTwitterLogin = async () => {
-    console.log(twitterRef.current);
-    // console.log(twitterRef.current.handleLoginClick);
-    const data = await twitterRef.current.handleLoginClick();
-    console.log(data);
-    // const er = await twitterRef.current.handleError(
-    //   twitterRef.current.handleLoginClick()
-    // );
-    // console.log(er);
-    // console.log(twitterRef.current.initializeProcess);
-    // const value = await twitterRef.current.initializeProcess();
-    // console.log(value);
-
-    // // const error = await twitterRef.current.handleError("error");
-    // // console.log(error);
-    // // const popup = await twitterRef.current.handleClosingPopup();
-    // // console.log(popup);
-    // const dt = await twitterRef.current;
-    // console.log(dt);
-    // const poo = await twitterRef.current.state.popup.window;
-    // console.log(poo);
-    // try {
-    //   const response = await axios.post(
-    //     `${base_url}user/twitter/oauth/request_token`
-    //   );
-
-    //   const { oauth_token } = response.data;
-    //   //Oauth Step 2
-    //   window.location.href = `https://api.twitter.com/oauth/authenticate?oauth_token=${oauth_token}`;
-    // } catch {}
+    await twitterRef.current.handleLoginClick();
   };
 
-  const onTwitterResponse = (err, data) => {
-    console.log(err, data);
+  const onTwitterResponse = async (err, data) => {
+    const { user_id } = data;
+    await axios
+      .post(`${base_url}user/twitterregister`, {
+        id: user_id,
+      })
+      .then((resp) => {
+        if (
+          resp.data.message === "user exist" ||
+          resp.data.message === "twitter success"
+        ) {
+          updateSnack("Success login", "success");
+
+          history.push({
+            pathname: `/userInfo/${resp.data.token}`,
+            params: {
+              fault: true,
+            },
+          });
+        } else {
+          updateSnack("Twitter signin error, try again", "error");
+
+          // setSnack({
+          //   ...snack,
+          //   fault: true,
+          //   message: "Twitter login error! try again",
+          //   severity: "error",
+          // });
+        }
+      })
+      .catch((err) => {
+        updateSnack("Twitter signin error, try again", "error");
+
+        // setSnack({
+        //   ...snack,
+        //   fault: true,
+        //   message: "Twitter login error! try again",
+        //   severity: "error",
+        // });
+      });
   };
 
   const onGithubResponse = async (response) => {
-    console.log(response);
     const { code } = response;
-    console.log(code);
-    if (code) {
-      await axios
-        .get("https://github.com/login/oauth/access_token", {
-          params: {
-            code: code,
-            client_id: `${process.env.REACT_APP_GITHUB_CLIENT}`,
-            client_secret: `${process.env.REACT_APP_GITHUB_SECRET}`,
-          },
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
-            "Access-Control-Allow-Headers":
-              "Origin, Content-Type, X-Auth-Token",
-          },
-        })
-        .then((res) => console.log(res))
-        .catch((err) => console.log(err));
-    }
-    // if (code) {
-    //   await axios
-    //     .post(
-    //       "https://github.com/login/oauth/access_token/",
-    //       {},
-    //       {
-    //         params: {
-    //           code: code,
-    //           client_id: "09a20728be4cbb8db076",
-    //           client_secret: "475435e0b3bb53775e957c62e2dfacdd84df2c7b",
-    //           redirectUri: "",
-    //         },
-    //         headers: {
-    //           "Access-Control-Allow-Origin": "*",
-    //           Accept: "application/json",
-    //         },
-    //       }
-    //     )
-    //     .then((resp) => {
-    //       console.log(resp);
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //     });
-    // } else console.log("code not defined");
+    await axios
+      .post(`${base_url}user/githubregister`, {
+        code: code,
+      })
+      .then((resp) => {
+        if (
+          resp.data.message === "user exist" ||
+          resp.data.message === "github success"
+        ) {
+          updateSnack("Success login", "success");
+
+          history.push({
+            pathname: `/userInfo/${resp.data.token}`,
+            params: {
+              fault: true,
+            },
+          });
+        } else {
+          updateSnack("Github signin error, try again", "error");
+
+          // setSnack({
+          //   ...snack,
+          //   fault: true,
+          //   message: "Github login error! try again",
+          //   severity: "error",
+          // });
+        }
+      })
+      .catch((err) => {
+        updateSnack("Github signin error, try again", "error");
+
+        // setSnack({
+        //   ...snack,
+        //   fault: true,
+        //   message: "Github login error! try again",
+        //   severity: "error",
+        // });
+      });
   };
   const onFailure = (response) => {
     console.error(response);
+  };
+  const onGithubLogin = async () => {
+    await gitRef.current.onBtnClick();
   };
 
   return (
     <>
       <Card sx={{ mx: "auto", width: "40%", p: 4, textAlign: "left" }}>
         <CardContent>
-          {console.log(theme.palette.mode)}
           {theme.palette.mode === "light" ? (
             <img src={logo} alt="logo" />
           ) : (
@@ -357,7 +378,7 @@ const Signup = () => {
             </FormControl>
             <FormControl sx={{ mb: 3, width: "100%" }} variant="outlined">
               <TextField
-                autocomplete
+                autoComplete="true"
                 required
                 id="outlined-password"
                 type={values.showPassword ? "text" : "password"}
@@ -469,17 +490,16 @@ const Signup = () => {
               >
                 <Avatar src={Twitter} alt="twitter" />
               </Button>
-              <GitHubLogin
-                clientId={`${process.env.REACT_APP_GITHUB_CLIENT}`}
-                redirectUri=""
-                onSuccess={onGithubResponse}
-                onFailure={onFailure}
-              />
-              <Avatar
-                // onClick={renderProps.onClick}
-                src={Github}
-                alt="github"
-              />
+              <Box sx={{ display: "none" }}>
+                <GitHubLogin
+                  clientId={`${process.env.REACT_APP_GITHUB_CLIENT}`}
+                  redirectUri=""
+                  onSuccess={onGithubResponse}
+                  onFailure={onFailure}
+                  ref={gitRef}
+                />
+              </Box>
+              <Avatar onClick={onGithubLogin} src={Github} alt="github" />
             </Stack>
             <Typography
               variant="caption"
@@ -515,8 +535,10 @@ const Signup = () => {
         onClose={handleClose}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Alert severity={snack.severity} onClose={handleClose}>
-          {snack.severity}:{snack.message}
+        <Alert variant="filled" severity={snack.severity} onClose={handleClose}>
+          {snack.severity}
+          {" : "}
+          {snack.message}
         </Alert>
       </Snackbar>
     </>

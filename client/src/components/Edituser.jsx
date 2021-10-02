@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
 import {
@@ -16,17 +16,15 @@ import {
   Snackbar,
   FormControl,
 } from "@mui/material";
-import logo from "../resources/devchallenges.svg";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import GroupIcon from "@mui/icons-material/Group";
 import { userUpdateEmailSchema, userPhoneSchema } from "./UserValidation";
-import base_url from "../devpro/baseurl";
+import base_url from "../devpro/Baseurl";
 import { signout } from "../auth/auth";
 
 const Edituser = (params) => {
-  console.log(params);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const history = useHistory();
   const [userValues, setUserValue] = useState({
@@ -51,7 +49,6 @@ const Edituser = (params) => {
 
   const handleValues = (prop) => async (event) => {
     if (prop === "img") {
-      console.log(event.target.files[0]);
       setUserValue({
         ...userValues,
         [prop]: URL.createObjectURL(event.target.files[0]),
@@ -61,32 +58,6 @@ const Edituser = (params) => {
       setUserValue({ ...userValues, [prop]: event.target.value });
     }
   };
-
-  // useEffect(() => {
-  //   axios
-  //     .get(`${base_url}userinfo`, {
-  //       params: {
-  //         id: `${params.match.params.id}`,
-  //       },
-  //     })
-  //     .then((res) => {
-  //       const ar = res.data.user.src.split(":");
-  //       setUserValue({
-  //         src:
-  //           ar[0] !== "https"
-  //             ? `${base_url}` + res.data.user.src
-  //             : res.data.user.src,
-  //         name: res.data.user.name,
-  //         email: res.data.user.email,
-  //         password: res.data.user.password,
-  //         bio: res.data.user.bio,
-  //         phone: res.data.user.phone,
-  //       });
-  //       console.log(userValues);
-  //       console.log(res);
-  //     })
-  //     .catch((err) => console.log(err));
-  // }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -102,16 +73,20 @@ const Edituser = (params) => {
     formData.append("bio", userValues.bio);
     formData.append("phone", userValues.phone);
 
-    console.log(userValues);
-    // console.log(userValues.src);
-    // console.log(formData.get("src"));
-
     if (emailValid && phoneValid) {
       await axios
         .put(`${base_url}userinfo`, formData)
         .then((res) => {
-          history.push(`/userInfo/${params.match.params.id}`);
-          console.log(res);
+          setSnack({
+            ...snack,
+            fault: true,
+            severity: "success",
+            message: "Update succesfull",
+          });
+          history.push({
+            pathname: `/userInfo/${params.match.params.id}`,
+            state: "true",
+          });
         })
         .catch((err) => console.log(err));
     } else {
@@ -149,7 +124,7 @@ const Edituser = (params) => {
         style={{
           color: "white",
           position: "relative",
-          top: "-6rem",
+          top: "-5rem",
           width: "12%",
           marginLeft: "auto",
           right: "9rem",
@@ -204,7 +179,12 @@ const Edituser = (params) => {
             onClick={() => {
               setAnchorEl(null);
               signout(() => {
-                history.push("/");
+                history.push({
+                  pathname: "/",
+                  params: {
+                    message: "logout",
+                  },
+                });
               });
             }}
           >
@@ -406,7 +386,7 @@ const Edituser = (params) => {
             display: "inline-grid",
             textAlign: "center",
             pt: "1rem",
-            boxShadow: "none",
+            position: "relative",
           }}
         >
           <Button
@@ -420,12 +400,14 @@ const Edituser = (params) => {
       </Box>
       <Snackbar
         open={snack.fault}
-        autoHideDuration={6000}
+        autoHideDuration={1000000}
         onClose={handleClose}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Alert severity={snack.severity} onClose={handleClose}>
-          {snack.severity}:{snack.message}
+        <Alert variant="filled" severity={snack.severity} onClose={handleClose}>
+          {snack.severity}
+          {" : "}
+          {snack.message}
         </Alert>
       </Snackbar>
     </>

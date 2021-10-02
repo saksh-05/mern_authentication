@@ -1,5 +1,4 @@
 import cookie from 'react-cookies'
-// import { GoogleLogout } from 'react-google-login';
 
 // Set in Cookie
 export const setCookie = (key, value) => {
@@ -24,8 +23,6 @@ export const removeCookie = key => {
 };
 
 
-// Get from cookie such as stored token
-// Will be useful when we need to make request to server with token
 export const getCookie = key => {
     if (window !== 'undefined') {
         return cookie.load(key);

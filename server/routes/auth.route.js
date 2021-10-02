@@ -1,5 +1,4 @@
 const router = require("express").Router();
-const { v4: uuidv4 } = require("uuid");
 const User = require("../userModels/user.modal");
 const userValidationSchema = require("../userValidation/userValidation");
 const userMiddleware = require("../middleware/userMiddleware");
@@ -7,6 +6,7 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
+const axios = require("axios");
 
 router
   .route("/signup")
@@ -33,7 +33,6 @@ router
               expiresIn: "5m",
             }
           );
-          console.log(token);
           const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -60,33 +59,30 @@ router
               console.log("Email sent: " + info.response);
             }
           });
+          res.send({
+            message: "new user",
+          });
         } else {
           res.send({
             status: false,
-            message: err,
+            message: "error",
           });
         }
       }
     );
-
-    console.log("saved");
   });
 
 router.route("/signup/activation").post((req, res) => {
-  console.log(req.body);
   const { token } = req.body;
-  console.log(token);
   if (token) {
     jwt.verify(token, process.env.JWT_ACCOUNT_SECRET, (err, decoded) => {
       if (err) {
-        console.log(err);
         res.send({
           status: false,
           message: "link expired",
         });
       } else {
         const { email, password } = jwt.decode(token);
-        console.log(email);
         const saltRounds = 10;
         const userPassword = password;
 
@@ -99,9 +95,7 @@ router.route("/signup/activation").post((req, res) => {
                   email: email,
                 },
                 (err, user) => {
-                  console.log(user);
                   if (!user) {
-                    console.log("new user");
                     const newUserData = {
                       email: email,
                       password: hash,
@@ -117,25 +111,12 @@ router.route("/signup/activation").post((req, res) => {
                       )
                       .catch((err) => res.status(400).json("Error: " + err));
                   } else if (err) {
-                    console.log(err);
                     res.send(err);
                   } else {
                     res.send({
                       status: true,
                       message: "User Exist",
                     });
-                    // bcrypt.compare(password, user.password, (err, result) => {
-                    //   if (result == true) {
-                    //     console.log("user exist");
-                    //   } else {
-                    //     console.log(err);
-                    //     res.send({
-                    //       status: false,
-                    //       message: "Incorrect password",
-                    //     });
-                    //     console.log("incorrect password");
-                    //   }
-                    // });
                   }
                 }
               );
@@ -188,18 +169,11 @@ router
                   useremail,
                 },
               });
-              // res.send({
-              //   status: 200,
-              //   message: "success",
-              // });
-              console.log("user exist");
             } else {
-              console.log(err);
               res.send({
                 status: false,
                 message: "error",
               });
-              console.log("incorrect password");
             }
           });
         }
@@ -214,62 +188,68 @@ router.route("/googleregister").post((req, res) => {
   client
     .verifyIdToken({ idToken: idToken, audience: process.env.GOOGLE_CLIENT })
     .then((response) => {
-      console.log(response.payload);
-      const { email_verified, email } = response.payload;
+      const { email_verified, email, name, picture } = response.payload;
       if (email_verified) {
         User.findOne(
           {
-            email: email,
+            email,
           },
-          (err, user) => {
+          async (err, user) => {
             if (user) {
-              console.log(user);
               const token = jwt.sign(
                 {
                   _id: user._id,
+                  idToken,
                 },
                 process.env.JWT_SECRET,
                 {
                   expiresIn: "1d",
                 }
               );
-              console.log(token);
-              const { _id, email } = user;
               return res.json({
                 message: "user exist",
                 token,
-                user: { _id, email },
               });
             } else if (err) {
-              console.log(err);
+              {
+                res.send({
+                  status: true,
+                  message: "Google error",
+                });
+              }
             } else {
+              const salt = await bcrypt.genSalt(10);
+              const password = await bcrypt.hash(idToken, salt);
               const newUserData = {
                 email: email,
-                password: idToken,
+                password: password,
+                name: name,
+                src: picture,
               };
               const newUser = new User(newUserData);
               newUser
                 .save()
                 .then((resp) => {
+                  const { _id, email } = resp;
+
                   const token = jwt.sign(
                     {
+                      _id: resp._id,
                       email,
+                      name: name,
+                      src: picture,
                     },
                     process.env.JWT_SECRET,
                     {
                       expiresIn: "7d",
                     }
                   );
-                  const { _id, email } = resp;
                   res.json({
                     message: "google added",
                     token,
-                    user: { _id, email },
                   });
                 })
                 .catch((err) => res.status(400).json("Error: " + err));
-
-              console.log(token);
             }
           }
         );
@@ -281,11 +261,9 @@ router.route("/googleregister").post((req, res) => {
       }
     })
     .catch((err) => console.log(err));
-  console.log("google register");
 });
 
 router.route("/facebookregister").post((req, res) => {
-  console.log(req.body);
   const { accessToken, userID, email, name, picture } = req.body;
   User.findOne(
     {
@@ -294,33 +272,24 @@ router.route("/facebookregister").post((req, res) => {
     async (err, user) => {
       if (err) console.log(err);
       else if (user) {
-        bcrypt.compare(userID, user.password, (err, result) => {
-          if (result) {
-            const token = jwt.sign(
-              {
-                _id: user._id,
-              },
-              process.env.JWT_SECRET,
-              {
-                expiresIn: "7d",
-              }
-            );
-            console.log("exist", token);
-            res.send({
-              token,
-              status: true,
-              message: "user exist",
-            });
-          } else {
-            res.send({
-              satus: true,
-              message: "Incorrect password",
-            });
+        const token = jwt.sign(
+          {
+            _id: user._id,
+            accessToken,
+          },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: "7d",
           }
+        );
+        res.send({
+          token,
+          status: true,
+          message: "user exist",
         });
       } else {
         const salt = await bcrypt.genSalt(10);
-        const password = await bcrypt.hash(userID, salt);
+        const password = await bcrypt.hash(accessToken, salt);
         const newUserData = {
           email: email,
           password: password,
@@ -331,7 +300,6 @@ router.route("/facebookregister").post((req, res) => {
         newUser
           .save()
           .then((resp) => {
-            console.log(resp);
             const token = jwt.sign(
               {
                 _id: resp._id,
@@ -345,7 +313,6 @@ router.route("/facebookregister").post((req, res) => {
                 expiresIn: "7d",
               }
             );
-            console.log(token);
             res.send({
               token,
               status: true,
@@ -356,28 +323,183 @@ router.route("/facebookregister").post((req, res) => {
       }
     }
   );
-  console.log("facebook register");
 });
-// router.route("/login").post((req, res) => {
-//   const validate = userMiddleware(userValidationSchema.userInfo);
-//   console.log(req.body);
-//   const newUserData = {
-//     email: req.body.email,
-//     password: uuidv4(),
-//   };
-//   const newUser = new User(newUserData);
 
-//   newUser
-//     .save()
-//     .then(() =>
-//       res.send({
-//         status: true,
-//         message: "user added",
-//       })
-//     )
-//     .catch((err) => res.status(400).json("Error: " + err));
+router.route("/twitterregister").post(async (req, res) => {
+  const { id } = req.body;
+  const url = `https://api.twitter.com/2/users/${id}?user.fields=description,id,location,name,profile_image_url,username`;
+  await axios
+    .get(url, {
+      headers: {
+        Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
+      },
+    })
+    .then(async (resp) => {
+      const { name, id, description, profile_image_url } = resp.data.data;
+      User.findOne(
+        {
+          twitterId: id,
+        },
+        async (err, user) => {
+          if (user) {
+            const token = jwt.sign(
+              {
+                _id: user._id,
+              },
+              process.env.JWT_SECRET,
+              {
+                expiresIn: "7d",
+              }
+            );
+            res.send({
+              token,
+              message: "user exist",
+            });
+          } else if (!user) {
+            const salt = await bcrypt.genSalt(10);
+            const password = await bcrypt.hash(id, salt);
+            const newUserData = {
+              password: password,
+              src: profile_image_url,
+              name: name,
+              bio: description,
+              twitterId: id,
+            };
+            const newUser = new User(newUserData);
+            newUser
+              .save()
+              .then((resp) => {
+                const token = jwt.sign(
+                  {
+                    _id: resp._id,
+                    password: resp.password,
+                    src: resp.src,
+                    name: resp.name,
+                    bio: resp.bio,
+                    twitterId: id,
+                  },
+                  process.env.JWT_SECRET,
+                  {
+                    expiresIn: "7d",
+                  }
+                );
+                res.send({
+                  token,
+                  status: true,
+                  message: "twitter success",
+                });
+              })
+              .catch((err) => {
+                res.send({
+                  message: "error",
+                });
+              });
+          } else {
+            res.send({
+              message: "twitter error",
+            });
+          }
+        }
+      );
+    })
+    .catch((err) => {
+      res.send({
+        message: "get error",
+      });
+    });
+});
 
-//   console.log("saved");
-// });
+router.route("/githubregister").post(async (req, res) => {
+  const { code } = req.body;
+  const url = `https://github.com/login/oauth/access_token?code=${code}&client_id=${process.env.GITHUB_CLIENT}&client_secret=${process.env.GITHUB_SECRET}`;
+  await axios
+    .get(url, {})
+    .then(async (resp) => {
+      const tokenArr = resp.data.split("&");
+      const tokenVal = tokenArr[0].split("=");
+      const userURL = "https://api.github.com/user";
+      await axios
+        .get(userURL, {
+          headers: {
+            Authorization: "token " + `${tokenVal[1]}`,
+          },
+        })
+        .then((response) => {
+          const { email, name, bio, avatar_url, node_id } = response.data;
+          User.findOne(
+            {
+              email,
+            },
+            async (err, user) => {
+              if (user) {
+                const token = jwt.sign(
+                  {
+                    _id: user._id,
+                    node_id,
+                  },
+                  process.env.JWT_SECRET,
+                  {
+                    expiresIn: "7d",
+                  }
+                );
+                res.send({
+                  message: "user exist",
+                  token,
+                });
+              } else if (!user) {
+                const salt = await bcrypt.genSalt(10);
+                const password = await bcrypt.hash(node_id, salt);
+                const newUserData = {
+                  email: email,
+                  password: password,
+                  src: avatar_url,
+                  name: name,
+                  bio: bio,
+                };
+                const newUser = new User(newUserData);
+                newUser
+                  .save()
+                  .then((resp) => {
+                    const token = jwt.sign(
+                      {
+                        _id: resp._id,
+                        email: resp.email,
+                        password: resp.password,
+                        src: resp.src,
+                        name: resp.name,
+                        bio: resp.bio,
+                      },
+                      process.env.JWT_SECRET,
+                      {
+                        expiresIn: "7d",
+                      }
+                    );
+                    res.send({
+                      token,
+                      status: true,
+                      message: "github success",
+                    });
+                  })
+                  .catch((err) => {
+                    res.send({
+                      message: "error",
+                    });
+                  });
+              }
+            }
+          );
+        })
+        .catch((err) => {
+          res.send({
+            message: "error",
+          });
+        });
+    })
+    .catch((err) => {
+      res.send({
+        message: "error",
+      });
+    });
+});
 
 module.exports = router;

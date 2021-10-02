@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import base_url from "../devpro/baseurl";
+import base_url from "../devpro/Baseurl";
 import axios from "axios";
 import { Alert, Button, Card, Snackbar,Link } from "@mui/material";
 import jwt from "jsonwebtoken";
@@ -26,7 +26,7 @@ const Activate = ({ match }) => {
       setFormData({ ...formData, email, token });
     }
     console.log(email, token);
-  }, [match.params]);
+  }, [match.params,formData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
