@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Card,
   Box,
@@ -34,7 +34,6 @@ import ReactGoogleLogin from "react-google-login";
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
 import TwitterLogin from "react-twitter-login";
 import GitHubLogin from "react-github-login";
-import { update } from "../../../server/userModels/user.modal";
 
 const Login = (params) => {
   const twitterRef = useRef();
@@ -54,9 +53,12 @@ const Login = (params) => {
     severity: "success",
   });
 
-  const updateSnack = (msg, svrt) => {
-    setSnack({ ...snack, fault: true, message: msg, severity: svrt });
-  };
+  const updateSnack = useCallback(
+    (msg, svrt) => {
+      setSnack({ ...snack, fault: true, message: msg, severity: svrt });
+    },
+    [setSnack, snack]
+  );
 
   const handleChange = (prop) => (event) => {
     setValues({ ...values, [prop]: event.target.value });
@@ -109,7 +111,8 @@ const Login = (params) => {
       //   severity: "info",
       // });
     }
-  }, [params.location.params, snack]);
+    console.log("login");
+  }, [params.location.params, updateSnack]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -179,6 +182,7 @@ const Login = (params) => {
   };
 
   const onGoogleResponse = async (resp) => {
+    console.log("google");
     await axios
       .post(`${base_url}user/googleregister`, {
         idToken: resp.tokenId,
@@ -188,12 +192,12 @@ const Login = (params) => {
           res.data.message === "google added" ||
           res.data.message === "user exist"
         ) {
-          updateSnack("Success login", "signup");
+          updateSnack("Success login", "success");
           history.push({
             pathname: `/userInfo/${res.data.token}`,
             params: {
               fault: true,
-              message: "User signup success",
+              message: "User signin success",
             },
           });
         } else {
@@ -268,6 +272,7 @@ const Login = (params) => {
   };
 
   const onTwitterResponse = async (err, data) => {
+    console.log(data);
     const { user_id } = data;
     await axios
       .post(`${base_url}user/twitterregister`, {
@@ -347,7 +352,14 @@ const Login = (params) => {
 
   return (
     <>
-      <Card sx={{ mx: "auto", width: "40%", p: 4, textAlign: "left" }}>
+      <Card
+        sx={{
+          mx: "auto",
+          width: { lg: "40%", sm: "100%" },
+          p: 4,
+          textAlign: "left",
+        }}
+      >
         <CardContent>
           {theme.palette.mode === "light" ? (
             <img src={logo} alt="logo" />
@@ -462,7 +474,6 @@ const Login = (params) => {
                     alt="google"
                   />
                 )}
-                buttonText=""
                 onSuccess={onGoogleResponse}
                 onFailure={onGoogleResponse}
               />
@@ -535,7 +546,7 @@ const Login = (params) => {
       </Card>
       <Snackbar
         open={snack.fault}
-        autoHideDuration={3000}
+        autoHideDuration={6000}
         onClose={handleClose}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
@@ -550,9 +561,3 @@ const Login = (params) => {
 };
 
 export default Login;
-
-
-
-
-
-

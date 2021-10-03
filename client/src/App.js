@@ -33,13 +33,6 @@ const App = () => {
       createTheme({
         palette: {
           mode,
-          status: {
-            danger: "#a30000",
-          },
-          error: {
-            main: "#f44336",
-            dark: "#a30000",
-          },
         },
       }),
     [mode]
@@ -101,7 +94,6 @@ const App = () => {
             p: "1rem",
             pb: 3,
           }}
-          disableripple
         >
           <Switch>
             <Route path="/login" component={Login}></Route>

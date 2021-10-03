@@ -42,8 +42,6 @@ const UserInfo = (params) => {
     severity: "success",
   });
 
-  var update = params.location.state;
-
   const handleClose = () => {
     setSnack({ ...snack, fault: false });
   };
@@ -64,13 +62,14 @@ const UserInfo = (params) => {
       message: msg,
       severity: "success",
     });
-    setTimeout(() => {
-      setSnack({
-        ...snack,
-        fault: false,
-      });
-      params.location.state = false;
-    }, 3000);
+    params.location.state = false;
+    // setTimeout(() => {
+    //   setSnack({
+    //     ...snack,
+    //     fault: false,
+    //   });
+    //   params.location.state = false;
+    // }, 3000);
   };
 
   useEffect(() => {
@@ -102,8 +101,9 @@ const UserInfo = (params) => {
       if (params.location.params !== undefined) {
         updateSnack("Success login");
       }
-      if (update) {
+      if (params.location.state) {
         updateSnack("Update Success");
+        params.location.state = false;
       }
       console.log("user info useeffect");
     }
