@@ -1,5 +1,5 @@
 {
-  "name": "authentication",
+  "name": "server",
   "version": "1.0.0",
   "description": "Authentication app",
   "main": "server.js",
