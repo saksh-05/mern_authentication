@@ -28,7 +28,7 @@ const UserInfo = (params) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const [userValues, setUserValue] = useState({
-    src: "../resources/devchallenges.svg",
+    src: "abc",
     name: "",
     bio: "",
     phone: "",

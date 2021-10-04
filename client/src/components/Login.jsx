@@ -474,6 +474,7 @@ const Login = (params) => {
                     alt="google"
                   />
                 )}
+                buttonText=""
                 onSuccess={onGoogleResponse}
                 onFailure={onGoogleResponse}
               />

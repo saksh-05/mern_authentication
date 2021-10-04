@@ -112,6 +112,7 @@ const Signup = (props) => {
         : console.log("nothing");
     }
   };
+  
   const handleClose = () => {
     setSnack({ ...snack, fault: false });
   };
@@ -176,6 +177,7 @@ const Signup = (props) => {
   };
 
   const onGoogleResponse = async (resp) => {
+
     await axios
       .post(`${base_url}user/googleregister`, {
         idToken: resp.tokenId,
@@ -460,7 +462,7 @@ const Signup = (props) => {
                 )}
                 buttonText=""
                 onSuccess={onGoogleResponse}
-                onFailure={onGoogleResponse}
+                onFailure={onFailure}
               />
               <FacebookLogin
                 appId={`${process.env.REACT_APP_FACEBOOK_CLIENT}`}
