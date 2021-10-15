@@ -28,7 +28,7 @@ const UserInfo = (params) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const [userValues, setUserValue] = useState({
-    src: "abc",
+    src: "",
     name: "",
     bio: "",
     phone: "",
@@ -113,14 +113,14 @@ const UserInfo = (params) => {
 
   return (
     <>
-      <div
-        style={{
+      <Box
+        sx={{
           color: "white",
           position: "relative",
-          top: "-5rem",
+          top: { xs: "-4.6rem", lg: "-5rem" },
           width: "12%",
           marginLeft: "auto",
-          right: "9rem",
+          right: { xs: "3rem", lg: "9rem" },
         }}
       >
         <IconButton
@@ -131,7 +131,14 @@ const UserInfo = (params) => {
           onClick={handleMenu}
           color="inherit"
         >
-          <Avatar alt="avatar" src={userValues.src} />
+          <Avatar
+            alt="avatar"
+            src={userValues.src}
+            sx={{
+              width: { xs: "35px", lg: "40px" },
+              height: { xs: "35px", lg: "40px" },
+            }}
+          />
         </IconButton>
         <Menu
           id="menu-appbar"
@@ -176,7 +183,7 @@ const UserInfo = (params) => {
             logout
           </MenuItem>
         </Menu>
-      </div>
+      </Box>
 
       <Box sx={{ position: "relative", top: "-3rem" }}>
         <Typography
@@ -199,23 +206,32 @@ const UserInfo = (params) => {
           Basic info like your name and photo
         </Typography>
       </Box>
-      <Card sx={{ width: "60%", margin: "auto" }}>
+      <Card sx={{ width: { lg: "60%", sm: "100%" }, margin: "auto" }}>
         <Card
           sx={{
             display: "inline-flex",
-            height: "8rem",
+            height: "6rem",
             width: "100%",
-            padding: "1rem",
-            paddingLeft: "3rem",
-            alignItems: "center",
-            paddingRight: "3rem",
+            p: "1rem",
+            pl: { lg: "3rem" },
+            alignItems: "self-start",
+            pr: { lg: "3rem" },
           }}
         >
           <div style={{ textAlign: "left", flex: "1" }}>
-            <Typography variant="h4">Profile</Typography>
+            <Typography
+              variant="h4"
+              sx={{ fontSize: { xs: "1.5rem", lg: "2.125rem" } }}
+            >
+              Profile
+            </Typography>
             <Typography
               variant="subtitle2"
-              sx={{ color: "#828282", fontWeight: "400" }}
+              sx={{
+                color: "#828282",
+                fontWeight: "400",
+                fontSize: { xs: "0.8rem", lg: "0.875rem" },
+              }}
             >
               Some info may be visible to other people
             </Typography>
@@ -225,9 +241,10 @@ const UserInfo = (params) => {
               variant="outlined"
               sx={{
                 borderRadius: "1rem",
-                width: "6rem",
+                width: { xs: "5rem", lg: "6rem" },
                 color: "#828282",
                 border: "1px solid #828282",
+                lineHeight: { xs: "1.5", lg: "1.75" },
               }}
               onClick={() => {
                 history.push({
@@ -244,12 +261,13 @@ const UserInfo = (params) => {
           sx={{
             width: "100%",
             display: "inline-flex",
-            paddingLeft: "3rem",
+            pl: { lg: "3rem" },
+            p: "1rem",
             height: "8rem",
             alignItems: "center",
           }}
         >
-          <Box textAlign="left" sx={{ width: "18rem" }}>
+          <Box textAlign="left" sx={{ width: { xs: "7rem", lg: "18rem" } }}>
             <Typography
               fontFamily="Noto Sans"
               sx={{ fontWeight: "600", color: "#BDBDBD" }}
@@ -257,21 +275,32 @@ const UserInfo = (params) => {
               Photo
             </Typography>
           </Box>
-          <Card sx={{ width: "6rem", height: "6rem" }}>
-            <img src={userValues.src} alt="profile" width="80px" />
-          </Card>
+          <Box
+            sx={{
+              width: { xs: "5rem", lg: "6rem" },
+              height: { xs: "5rem", lg: "6rem" },
+            }}
+          >
+            <img
+              src={userValues.src}
+              alt="profile"
+              width="100%"
+              height="100%"
+            />
+          </Box>
         </Card>
         <Divider />
         <Card
           sx={{
             width: "100%",
             display: "inline-flex",
-            paddingLeft: "3rem",
+            pl: { lg: "3rem" },
+            p: "1rem",
             height: "8rem",
             alignItems: "center",
           }}
         >
-          <Box textAlign="left" sx={{ width: "18rem" }}>
+          <Box textAlign="left" sx={{ width: { xs: "7rem", lg: "18rem" } }}>
             <Typography
               fontFamily="Noto Sans"
               sx={{ fontWeight: "600", color: "#BDBDBD" }}
@@ -279,7 +308,14 @@ const UserInfo = (params) => {
               Name
             </Typography>
           </Box>
-          <Typography variant="h5" fontFamily="Noto Sans">
+          <Typography
+            variant="h5"
+            fontFamily="Noto Sans"
+            sx={{
+              overflowWrap: "anywhere",
+              fontSize: { xs: "1.2rem", lg: "1.5rem" },
+            }}
+          >
             {userValues.name}
           </Typography>
         </Card>
@@ -288,12 +324,13 @@ const UserInfo = (params) => {
           sx={{
             width: "100%",
             display: "inline-flex",
-            paddingLeft: "3rem",
+            pl: { lg: "3rem" },
+            p: "1rem",
             height: "8rem",
             alignItems: "center",
           }}
         >
-          <Box textAlign="left" sx={{ width: "18rem" }}>
+          <Box textAlign="left" sx={{ width: { xs: "7rem", lg: "18rem" } }}>
             <Typography
               fontFamily="Noto Sans"
               sx={{ fontWeight: "600", color: "#BDBDBD" }}
@@ -301,7 +338,14 @@ const UserInfo = (params) => {
               Bio
             </Typography>
           </Box>
-          <Typography variant="h5" fontFamily="Noto Sans">
+          <Typography
+            variant="h5"
+            fontFamily="Noto Sans"
+            sx={{
+              overflowWrap: "anywhere",
+              fontSize: { xs: "1.2rem", lg: "1.5rem" },
+            }}
+          >
             {userValues.bio}
           </Typography>
         </Card>
@@ -310,12 +354,13 @@ const UserInfo = (params) => {
           sx={{
             width: "100%",
             display: "inline-flex",
-            paddingLeft: "3rem",
+            pl: { lg: "3rem" },
+            p: "1rem",
             height: "8rem",
             alignItems: "center",
           }}
         >
-          <Box textAlign="left" sx={{ width: "18rem" }}>
+          <Box textAlign="left" sx={{ width: { xs: "7rem", lg: "18rem" } }}>
             <Typography
               fontFamily="Noto Sans"
               sx={{ fontWeight: "600", color: "#BDBDBD" }}
@@ -323,7 +368,11 @@ const UserInfo = (params) => {
               Phone
             </Typography>
           </Box>
-          <Typography variant="h5" fontFamily="Noto Sans">
+          <Typography
+            variant="h5"
+            fontFamily="Noto Sans"
+            sx={{ fontSize: { xs: "1.2rem" } }}
+          >
             {userValues.phone}
           </Typography>
         </Card>
@@ -332,12 +381,13 @@ const UserInfo = (params) => {
           sx={{
             width: "100%",
             display: "inline-flex",
-            paddingLeft: "3rem",
+            pl: { lg: "3rem" },
+            p: "1rem",
             height: "8rem",
             alignItems: "center",
           }}
         >
-          <Box textAlign="left" sx={{ width: "18rem" }}>
+          <Box textAlign="left" sx={{ width: { xs: "8.5rem", lg: "18rem" } }}>
             <Typography
               fontFamily="Noto Sans"
               sx={{ fontWeight: "600", color: "#BDBDBD" }}
@@ -345,7 +395,14 @@ const UserInfo = (params) => {
               Email
             </Typography>
           </Box>
-          <Typography variant="h5" fontFamily="Noto Sans">
+          <Typography
+            variant="h5"
+            fontFamily="Noto Sans"
+            sx={{
+              overflowWrap: "anywhere",
+              fontSize: { xs: "1.2rem", lg: "1.5rem" },
+            }}
+          >
             {userValues.email}
           </Typography>
         </Card>
@@ -354,12 +411,13 @@ const UserInfo = (params) => {
           sx={{
             width: "100%",
             display: "inline-flex",
-            paddingLeft: "3rem",
+            pl: { lg: "3rem" },
+            p: "1rem",
             height: "8rem",
             alignItems: "center",
           }}
         >
-          <Box textAlign="left" sx={{ width: "18rem" }}>
+          <Box textAlign="left" sx={{ width: { xs: "7rem", lg: "18rem" } }}>
             <Typography
               fontFamily="Noto Sans"
               sx={{ fontWeight: "600", color: "#BDBDBD" }}

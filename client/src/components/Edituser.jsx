@@ -120,14 +120,14 @@ const Edituser = (params) => {
 
   return (
     <>
-      <div
-        style={{
+      <Box
+        sx={{
           color: "white",
           position: "relative",
-          top: "-5rem",
+          top: { xs: "-4.6rem", lg: "-5rem" },
           width: "12%",
           marginLeft: "auto",
-          right: "9rem",
+          right: { xs: "3rem", lg: "9rem" },
         }}
       >
         <IconButton
@@ -137,7 +137,14 @@ const Edituser = (params) => {
           aria-haspopup="true"
           onClick={handleMenu}
         >
-          <Avatar alt="avatar" src={userValues.src} />
+          <Avatar
+            alt="avatar"
+            src={userValues.src}
+            sx={{
+              width: { xs: "35px", lg: "40px" },
+              height: { xs: "35px", lg: "40px" },
+            }}
+          />
         </IconButton>
         <Menu
           id="menu-appbar"
@@ -192,20 +199,20 @@ const Edituser = (params) => {
             logout
           </MenuItem>
         </Menu>
-      </div>
+      </Box>
       <Box
         component="form"
         // encType="multipart/form-data"
         onSubmit={handleSubmit}
-        sx={{ width: "60%", margin: "auto" }}
+        sx={{ width: { lg: "60%", sm: "100%" }, margin: "auto" }}
       >
         <Card
           sx={{
             display: "inline-flex",
             height: "8rem",
             width: "100%",
-            padding: "1rem",
-            paddingLeft: "3rem",
+            p: "1rem",
+            pl: { lg: "3rem" },
             alignItems: "center",
             paddingRight: "3rem",
           }}
@@ -225,7 +232,8 @@ const Edituser = (params) => {
             sx={{
               width: "100%",
               display: "inline-flex",
-              paddingLeft: "3rem",
+              p: "1rem",
+              pl: { lg: "3rem" },
               height: "8rem",
               alignItems: "center",
             }}
@@ -241,7 +249,10 @@ const Edituser = (params) => {
                 sx={{ position: "relative", top: "-4rem", color: "white" }}
               />
             </Card>
-            <Box textAlign="left" sx={{ width: "18rem", ml: 4 }}>
+            <Box
+              textAlign="left"
+              sx={{ width: { xs: "10rem", lg: "18rem" }, ml: 4 }}
+            >
               <input
                 accept="image/*"
                 style={{ display: "none" }}
@@ -261,7 +272,8 @@ const Edituser = (params) => {
           <Card
             sx={{
               width: "100%",
-              paddingLeft: "3rem",
+              p: "1rem",
+              pl: { lg: "3rem" },
               height: "8rem",
               display: "inline-grid",
               textAlign: "center",
@@ -276,7 +288,7 @@ const Edituser = (params) => {
               placeholder="Enter your name..."
               variant="outlined"
               onChange={handleValues("name")}
-              sx={{ width: "25rem", mt: "-1.5rem" }}
+              sx={{ width: { xs: "19.5rem", lg: "25rem" }, mt: "-0.5rem" }}
             />
           </Card>
         </FormControl>
@@ -285,7 +297,8 @@ const Edituser = (params) => {
           <Card
             sx={{
               width: "100%",
-              paddingLeft: "3rem",
+              p: "1rem",
+              pl: { lg: "3rem" },
               height: "15rem",
               display: "inline-grid",
               textAlign: "center",
@@ -301,7 +314,7 @@ const Edituser = (params) => {
               onChange={handleValues("bio")}
               multiline
               rows={6}
-              sx={{ width: "25rem", mt: "-1.5rem" }}
+              sx={{ width: { xs: "19.5rem", lg: "25rem" }, mt: "-0.5rem" }}
             />
           </Card>
         </FormControl>
@@ -310,7 +323,8 @@ const Edituser = (params) => {
           <Card
             sx={{
               width: "100%",
-              paddingLeft: "3rem",
+              p: "1rem",
+              pl: { lg: "3rem" },
               height: "8rem",
               display: "inline-grid",
               textAlign: "center",
@@ -325,7 +339,7 @@ const Edituser = (params) => {
               placeholder="Enter your phone..."
               variant="outlined"
               onChange={handleValues("phone")}
-              sx={{ width: "25rem", mt: "-1.5rem" }}
+              sx={{ width: { xs: "19.5rem", lg: "25rem" }, mt: "-0.5rem" }}
             />
           </Card>
         </FormControl>
@@ -334,7 +348,8 @@ const Edituser = (params) => {
           <Card
             sx={{
               width: "100%",
-              paddingLeft: "3rem",
+              p: "1rem",
+              pl: { lg: "3rem" },
               height: "8rem",
               display: "inline-grid",
               textAlign: "center",
@@ -349,7 +364,7 @@ const Edituser = (params) => {
               placeholder="Enter your email"
               variant="outlined"
               onChange={handleValues("email")}
-              sx={{ width: "25rem", mt: "-1.5rem" }}
+              sx={{ width: { xs: "19.5rem", lg: "25rem" }, mt: "-0.5rem" }}
             />
           </Card>
         </FormControl>
@@ -358,7 +373,8 @@ const Edituser = (params) => {
           <Card
             sx={{
               width: "100%",
-              paddingLeft: "3rem",
+              p: "1rem",
+              pl: { lg: "3rem" },
               height: "8rem",
               display: "inline-grid",
               textAlign: "center",
@@ -373,7 +389,7 @@ const Edituser = (params) => {
               placeholder="Enter your new password"
               variant="outlined"
               onChange={handleValues("password")}
-              sx={{ width: "25rem", mt: "-1.5rem" }}
+              sx={{ width: { xs: "19.5rem", lg: "25rem" }, mt: "-0.5rem" }}
             />
           </Card>
         </FormControl>
@@ -381,7 +397,8 @@ const Edituser = (params) => {
         <Card
           sx={{
             width: "100%",
-            paddingLeft: "3rem",
+            p: "1rem",
+            pl: { lg: "3rem" },
             height: "5rem",
             display: "inline-grid",
             textAlign: "center",

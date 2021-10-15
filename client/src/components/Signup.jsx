@@ -59,15 +59,6 @@ const Signup = (props) => {
 
   useEffect(() => {
     if (props.location.params !== undefined) {
-      // if (props.location.params.message === "signup") {
-      //   updateSnack('User not found singup','error');
-      //   setSnack({
-      //     ...snack,
-      //     fault: true,
-      //     message: "User not found signup",
-      //     severity: "error",
-      //   });
-      // } else
       if (props.location.params.message === "logout") {
         updateSnack("Logged out", "success");
       }
@@ -112,7 +103,7 @@ const Signup = (props) => {
         : console.log("nothing");
     }
   };
-  
+
   const handleClose = () => {
     setSnack({ ...snack, fault: false });
   };
@@ -136,48 +127,19 @@ const Signup = (props) => {
                 message: "User exist please login",
               },
             });
-            // } else if (res.data.message === "new user") {
-            // setSnack({
-            //   ...snack,
-            //   fault: true,
-            //   message: " for verification",
-            //   severity: "success",
-            // });
           } else {
             updateSnack("Check your email", "success");
-
-            // updateSnack('Login error try again','error')
-
-            // setSnack({
-            //   ...snack,
-            //   fault: true,
-            //   message: "login error try again",
-            //   severity: "error",
-            // });
           }
         })
         .catch((err) => {
           updateSnack(err, "error");
-          // setSnack({
-          //   ...snack,
-          //   fault: true,
-          //   message: err,
-          //   severity: "error",
-          // });
         });
     } else {
       updateSnack("Enter correct detail", "error");
-      // setSnack({
-      //   ...snack,
-      //   fault: true,
-      //   message: "Enter correct detail",
-      //   severity: "error",
-      // });
     }
   };
 
   const onGoogleResponse = async (resp) => {
-
     await axios
       .post(`${base_url}user/googleregister`, {
         idToken: resp.tokenId,
@@ -197,13 +159,6 @@ const Signup = (props) => {
           });
         } else {
           updateSnack("Google signin error try again", "error");
-          // history.push("/login");
-          // setSnack({
-          //   ...snack,
-          //   fault: true,
-          //   message: "User already exist",
-          //   severity: "error",
-          // });
         }
       })
       .catch((err) => {
@@ -224,12 +179,6 @@ const Signup = (props) => {
       .then((res) => {
         if (res.data.message === "Incorrect password") {
           updateSnack("Facebook login error, try again", "error");
-          // setSnack({
-          //   ...snack,
-          //   fault: true,
-          //   message: "Facebook login error! try again",
-          //   severity: "error",
-          // });
         } else {
           updateSnack("Success login", "success");
           history.push({
@@ -268,24 +217,10 @@ const Signup = (props) => {
           });
         } else {
           updateSnack("Twitter signin error, try again", "error");
-
-          // setSnack({
-          //   ...snack,
-          //   fault: true,
-          //   message: "Twitter login error! try again",
-          //   severity: "error",
-          // });
         }
       })
       .catch((err) => {
         updateSnack("Twitter signin error, try again", "error");
-
-        // setSnack({
-        //   ...snack,
-        //   fault: true,
-        //   message: "Twitter login error! try again",
-        //   severity: "error",
-        // });
       });
   };
 
@@ -310,24 +245,10 @@ const Signup = (props) => {
           });
         } else {
           updateSnack("Github signin error, try again", "error");
-
-          // setSnack({
-          //   ...snack,
-          //   fault: true,
-          //   message: "Github login error! try again",
-          //   severity: "error",
-          // });
         }
       })
       .catch((err) => {
         updateSnack("Github signin error, try again", "error");
-
-        // setSnack({
-        //   ...snack,
-        //   fault: true,
-        //   message: "Github login error! try again",
-        //   severity: "error",
-        // });
       });
   };
   const onFailure = (response) => {
@@ -339,7 +260,14 @@ const Signup = (props) => {
 
   return (
     <>
-      <Card sx={{ mx: "auto", width: "40%", p: 4, textAlign: "left" }}>
+      <Card
+        sx={{
+          mx: "auto",
+          width: { lg: "40%", sm: "100%" },
+          p: 4,
+          textAlign: "left",
+        }}
+      >
         <CardContent>
           {theme.palette.mode === "light" ? (
             <img src={logo} alt="logo" />
@@ -406,9 +334,9 @@ const Signup = (props) => {
                         edge="end"
                       >
                         {values.showPassword ? (
-                          <VisibilityOff />
-                        ) : (
                           <Visibility />
+                        ) : (
+                          <VisibilityOff />
                         )}
                       </IconButton>
                     </InputAdornment>

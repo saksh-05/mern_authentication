@@ -8,7 +8,7 @@ import Brightness7Icon from "@mui/icons-material/Brightness7";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
 import EditUser from "./components/Edituser";
-import { AppBar, Toolbar, Typography } from "@mui/material";
+import { AppBar, Hidden, Toolbar, Typography } from "@mui/material";
 import UserInfo from "./components/UserInfo";
 import Activate from "./components/Activate";
 import dlogo from "./resources/devchallenges-light.svg";
@@ -42,13 +42,20 @@ const App = () => {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <AppBar position="static" sx={{ px: "1rem" }}>
-          <Toolbar>
-            {theme.palette.mode === "light" ? (
-              <img src={logo} alt="logo" width="192px" />
-            ) : (
-              <img src={dlogo} alt="dark logo" width="192px" />
-            )}
-
+          <Toolbar sx={{ px: { xs: 0, lg: 2 } }}>
+            <Box
+              sx={{
+                width: { xs: "150px", lg: "192px" },
+                position: "relative",
+                top: "3px",
+              }}
+            >
+              {theme.palette.mode === "light" ? (
+                <img src={logo} alt="logo" width="100%" />
+              ) : (
+                <img src={dlogo} alt="dark logo" width="100%" />
+              )}
+            </Box>
             <Box
               sx={{
                 textAlign: "right",
@@ -66,7 +73,7 @@ const App = () => {
                   }`,
                   color: theme.palette.mode === "dark" ? "yellow" : "black",
                   height: "2rem",
-                  width: "10rem",
+                  width: { xs: "2rem", lg: "10rem" },
                   display: "inline-flex",
                   justifyContent: "center",
                   borderRadius: "0.5rem",
@@ -75,8 +82,13 @@ const App = () => {
                 }}
                 onClick={colorMode.toggleColorMode}
               >
-                {theme.palette.mode} mode
-                <IconButton sx={{ ml: 1, pr: 0 }} color="inherit">
+                <Box sx={{ display: { xs: "none", lg: "block" } }}>
+                  {theme.palette.mode} mode
+                </Box>
+                <IconButton
+                  sx={{ ml: { xs: 0, lg: 1 }, pr: 0, pl: { xs: 0, lg: 1 } }}
+                  color="inherit"
+                >
                   {theme.palette.mode === "dark" ? (
                     <Brightness7Icon />
                   ) : (
@@ -113,7 +125,11 @@ const App = () => {
             justifyContent="left"
             alignItems="center"
             color="gray"
-            sx={{ m: "auto", width: "40%", textAlign: "left" }}
+            sx={{
+              m: "auto",
+              width: { lg: "40%", sm: "100%" },
+              textAlign: "left",
+            }}
           >
             <Typography sx={{ flex: "1" }}>Create by Saurabh</Typography>
             <Typography>devChallenges.io</Typography>

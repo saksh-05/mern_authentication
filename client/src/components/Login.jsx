@@ -104,12 +104,6 @@ const Login = (params) => {
   useEffect(() => {
     if (params.location.params !== undefined) {
       updateSnack(params.location.params.message, "info");
-      // setSnack({
-      //   ...snack,
-      //   fault: true,
-      //   message: params.location.params.message,
-      //   severity: "info",
-      // });
     }
     console.log("login");
   }, [params.location.params, updateSnack]);
@@ -135,49 +129,18 @@ const Login = (params) => {
                     },
                   })
                 : updateSnack("Enter correct detail", "error");
-              // setSnack({
-              //     ...snack,
-              //     fault: true,
-              //     message: "Enter correct detail",
-              //     severity: "error",
-              //   });
             });
           } else if (res.data.message === "not found") {
             updateSnack("User not found, Singup please", "info");
-            // history.push({
-            //   pathname: "/",
-            //   params: {
-            //     logout: false,
-            //     message: "signup",
-            //   },
-            // });
           } else {
             updateSnack("Incorrect password", "error");
-            // setSnack({
-            //   ...snack,
-            //   fault: true,
-            //   message: "Incorrect password",
-            //   severity: "error",
-            // });
           }
         })
         .catch((err) => {
           updateSnack("Login error, try again", "error");
-          // setSnack({
-          //   ...snack,
-          //   fault: true,
-          //   message: "Login error! try again",
-          //   severity: "error",
-          // });
         });
     } else {
       updateSnack("Enter correct detail", "error");
-      // setSnack({
-      //   ...snack,
-      //   fault: true,
-      //   message: "Enter correct detail",
-      //   severity: "error",
-      // });
     }
   };
 
@@ -202,25 +165,10 @@ const Login = (params) => {
           });
         } else {
           updateSnack("Google signin error try again", "error");
-
-          // history.push("/login");
-          // setSnack({
-          //   ...snack,
-          //   fault: true,
-          //   message: "Google login error",
-          //   severity: "error",
-          // });
         }
       })
       .catch((err) => {
         updateSnack("Google singin error, try again", "error");
-
-        setSnack({
-          ...snack,
-          fault: true,
-          message: "Google login error! try again",
-          severity: "error",
-        });
       });
   };
 
@@ -237,13 +185,6 @@ const Login = (params) => {
       .then((res) => {
         if (res.data.message === "Incorrect password") {
           updateSnack("Facebook login error, try again", "error");
-
-          // setSnack({
-          //   ...snack,
-          //   fault: true,
-          //   message: "Facebook login error! try again",
-          //   severity: "error",
-          // });
         } else {
           updateSnack("Success login", "success");
 
@@ -257,13 +198,6 @@ const Login = (params) => {
       })
       .catch((err) => {
         updateSnack("Facebook login error, try again", "error");
-
-        // setSnack({
-        //   ...snack,
-        //   fault: true,
-        //   message: "Facebook login error! try again",
-        //   severity: "error",
-        // });
       });
   };
 
@@ -290,21 +224,11 @@ const Login = (params) => {
             },
           });
         } else {
-          setSnack({
-            ...snack,
-            fault: true,
-            message: "Twitter login error! try again",
-            severity: "error",
-          });
+          updateSnack("Twitter login error, try again", "error");
         }
       })
       .catch((err) => {
-        setSnack({
-          ...snack,
-          fault: true,
-          message: "Twitter login error! try again",
-          severity: "error",
-        });
+        updateSnack("Twitter login error, try again", "error");
       });
   };
 
@@ -326,21 +250,11 @@ const Login = (params) => {
             },
           });
         } else {
-          setSnack({
-            ...snack,
-            fault: true,
-            message: "Github login error! try again",
-            severity: "error",
-          });
+          updateSnack("Github login error, try again", "error");
         }
       })
       .catch((err) => {
-        setSnack({
-          ...snack,
-          fault: true,
-          message: err,
-          severity: "error",
-        });
+        updateSnack("Github login error, try again", "error");
       });
   };
   const onFailure = (response) => {
@@ -420,9 +334,9 @@ const Login = (params) => {
                         edge="end"
                       >
                         {values.showPassword ? (
-                          <VisibilityOff />
-                        ) : (
                           <Visibility />
+                        ) : (
+                          <VisibilityOff />
                         )}
                       </IconButton>
                     </InputAdornment>
