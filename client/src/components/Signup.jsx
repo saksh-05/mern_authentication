@@ -207,7 +207,7 @@ const Signup = (props) => {
           resp.data.message === "user exist" ||
           resp.data.message === "twitter success"
         ) {
-          updateSnack("Success login", "success");
+          updateSnack("Success signin", "success");
 
           history.push({
             pathname: `/userInfo/${resp.data.token}`,
@@ -220,6 +220,7 @@ const Signup = (props) => {
         }
       })
       .catch((err) => {
+        console.log(err);
         updateSnack("Twitter signin error, try again", "error");
       });
   };
