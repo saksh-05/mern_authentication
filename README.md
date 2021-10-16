@@ -37,7 +37,7 @@
 
 ## Overview
 
-![screenshot]('./shot/React App.png)
+![screenshot]('./shot/React App.png')
 
 This is one of the mostly needed web app. The app is about user being authenticated and verified before accessing any app content. You can see demo [here](https://mern-authentication.netlify.app/). User can login through different social login method.
 
