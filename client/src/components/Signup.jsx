@@ -198,6 +198,7 @@ const Signup = (props) => {
 
   const onTwitterResponse = async (err, data) => {
     const { user_id } = data;
+    console.log(user_id);
     await axios
       .post(`${base_url}user/twitterregister`, {
         id: user_id,
